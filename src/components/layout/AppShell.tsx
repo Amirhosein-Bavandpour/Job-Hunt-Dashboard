@@ -31,7 +31,7 @@ const navItems = [
   { label: 'Analytics', href: '/analytics', icon: <QueryStatsIcon /> },
 ];
 
-export default function AppShell({ children }: { children: React.ReactNode }) {
+export default function AppShell({ children }: { children: ReactNode }) {
   const sidebarOpen = useDashboardUIStore((s) => s.sidebarOpen);
   const toggleSidebar = useDashboardUIStore((s) => s.toggleSidebar);
   const pathname = usePathname();
@@ -39,7 +39,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const drawer = (
     <Box>
       <Toolbar>
-        <Typography variant="h6" noWrap component="div">
+        <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 700 }}>
           Job Hunt
         </Typography>
       </Toolbar>
@@ -50,8 +50,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             component={Link}
             href={item.href}
             selected={pathname === item.href}
+            sx={{
+              mx: 1,
+              borderRadius: 2,
+              '&.Mui-selected': {
+                background: 'rgba(34,211,238,0.10)',
+                border: '1px solid rgba(34,211,238,0.40)',
+                '& .MuiListItemIcon-root, & .MuiListItemText-primary': { color: 'primary.main' },
+              },
+            }}
           >
-            <ListItemIcon>{item.icon}</ListItemIcon>
+            <ListItemIcon sx={{ color: 'text.secondary', minWidth: 40 }}>{item.icon}</ListItemIcon>
             <ListItemText primary={item.label} />
           </ListItemButton>
         ))}
@@ -60,7 +69,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <AppBar
         position="fixed"
         sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}
@@ -75,7 +84,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
+          <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 700 }} noWrap component="div">
             Job Hunt Dashboard
           </Typography>
         </Toolbar>
