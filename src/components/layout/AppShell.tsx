@@ -43,7 +43,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           Job Hunt
         </Typography>
       </Toolbar>
-      <List>
+      <List sx={{ mt: 1, px: 0.5 }}>
         {navItems.map((item) => (
           <ListItemButton
             key={item.href}
@@ -51,7 +51,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
             href={item.href}
             selected={pathname === item.href}
             sx={{
-              mx: 1,
+              mx: 1.5,
+              my: 1,
+              px: 2,
+              py: 1.25,
               borderRadius: 2,
               '&.Mui-selected': {
                 background: 'rgba(34,211,238,0.10)',
