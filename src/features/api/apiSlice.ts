@@ -32,8 +32,6 @@ const db: JobApplication[] = [
   },
 ];
 
-const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
 export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: fakeBaseQuery(),
@@ -41,14 +39,12 @@ export const apiSlice = createApi({
   endpoints: (builder) => ({
     getApplications: builder.query<JobApplication[], void>({
       queryFn: async () => {
-        await delay(300);
         return { data: [...db] };
       },
       providesTags: ['Application'],
     }),
     getApplication: builder.query<JobApplication, string>({
       queryFn: async (id) => {
-        await delay(200);
         const found = db.find((a) => a.id === id);
         return found ? { data: found } : { error: { status: 404, data: 'Not found' } };
       },
@@ -56,7 +52,6 @@ export const apiSlice = createApi({
     }),
     getDashboardStats: builder.query<DashboardStats, void>({
       queryFn: async () => {
-        await delay(200);
         const thisMonth = db.filter(
           (a) => a.appliedAt && a.appliedAt.startsWith('2026-08')
         ).length;
@@ -74,7 +69,6 @@ export const apiSlice = createApi({
     }),
     addApplication: builder.mutation<JobApplication, Partial<JobApplication>>({
       queryFn: async (input) => {
-        await delay(250);
         const created: JobApplication = {
           id: String(Date.now()),
           company: input.company ?? 'Unknown',
@@ -92,7 +86,6 @@ export const apiSlice = createApi({
     }),
     updateApplication: builder.mutation<JobApplication, Partial<JobApplication> & { id: string }>({
       queryFn: async ({ id, ...patch }) => {
-        await delay(250);
         const idx = db.findIndex((a) => a.id === id);
         if (idx === -1) return { error: { status: 404, data: 'Not found' } };
         db[idx] = { ...db[idx], ...patch };
@@ -106,7 +99,6 @@ export const apiSlice = createApi({
     }),
     deleteApplication: builder.mutation<{ id: string }, string>({
       queryFn: async (id) => {
-        await delay(200);
         const idx = db.findIndex((a) => a.id === id);
         if (idx !== -1) db.splice(idx, 1);
         return { data: { id } };
