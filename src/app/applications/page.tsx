@@ -16,6 +16,7 @@ import {
 } from '@/features/api/apiSlice';
 import type { JobApplication, ApplicationStatus } from '@/types';
 import ApplicationForm from '@/components/applications/ApplicationForm';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
 
 const STATUSES: ApplicationStatus[] = [
   'saved', 'applied', 'screening', 'interview', 'offer', 'rejected',
@@ -36,6 +37,7 @@ export default function ApplicationsPage() {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<JobApplication | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<JobApplication | null>(null);
 
   const filtered = useMemo(() => {
     let list = [...apps];
@@ -74,10 +76,15 @@ export default function ApplicationsPage() {
     setPage(1);
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Delete this application?')) {
-      await deleteApp(id);
+  const handleDelete = (app: JobApplication) => {
+    setPendingDelete(app);
+  };
+
+  const confirmDelete = async () => {
+    if (pendingDelete) {
+      await deleteApp(pendingDelete.id);
     }
+    setPendingDelete(null);
   };
 
   const openAdd = () => { setEditing(null); setFormOpen(true); };
@@ -150,7 +157,7 @@ export default function ApplicationsPage() {
               <TableCell>{a.appliedAt ?? '—'}</TableCell>
               <TableCell align="right">
                 <IconButton size="small" onClick={() => openEdit(a)}><EditIcon fontSize="small" /></IconButton>
-                <IconButton size="small" color="error" onClick={() => handleDelete(a.id)}><DeleteIcon fontSize="small" /></IconButton>
+                <IconButton size="small" color="error" onClick={() => handleDelete(a)}><DeleteIcon fontSize="small" /></IconButton>
               </TableCell>
             </TableRow>
           ))}
@@ -173,6 +180,15 @@ export default function ApplicationsPage() {
       </Stack>
 
       <ApplicationForm open={formOpen} onClose={() => setFormOpen(false)} editing={editing} />
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title="Delete application?"
+        message={pendingDelete ? `Delete "${pendingDelete.position}" at ${pendingDelete.company}? This cannot be undone.` : ''}
+        confirmLabel="Delete"
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
     </Box>
   );
 }
