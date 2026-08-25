@@ -9,7 +9,7 @@ const theme = createTheme({
     mode: 'dark',
     background: {
       default: '#020617',
-      paper: 'rgba(255,255,255,0.05)',
+      paper: '#0b1220', // solid dark (not transparent) so popovers/menus are readable
     },
     primary: { main: '#22d3ee' }, // cyan-400
     secondary: { main: '#38bdf8' },
@@ -82,6 +82,29 @@ const theme = createTheme({
         paper: {
           background: 'rgba(2,6,23,0.95)',
           borderRight: '1px solid rgba(255,255,255,0.10)',
+        },
+      },
+    },
+    MuiMenu: {
+      styleOverrides: {
+        paper: {
+          background: '#0b1220',
+          border: '1px solid rgba(255,255,255,0.10)',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+        },
+        list: { padding: 4 },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          color: '#f1f5f9',
+          '&:hover': { background: 'rgba(34,211,238,0.10)' },
+          '&.Mui-selected': {
+            background: 'rgba(34,211,238,0.15)',
+            '&:hover': { background: 'rgba(34,211,238,0.20)' },
+          },
         },
       },
     },
