@@ -183,8 +183,8 @@ export default function ApplicationsPage() {
 
       <ConfirmDialog
         open={pendingDelete !== null}
-        title="Delete application?"
-        message={pendingDelete ? `Delete "${pendingDelete.position}" at ${pendingDelete.company}? This cannot be undone.` : ''}
+        title="Delete Application"
+        message={pendingDelete ? `${pendingDelete.position} at ${pendingDelete.company} will be permanently removed.` : ''}
         confirmLabel="Delete"
         onConfirm={confirmDelete}
         onCancel={() => setPendingDelete(null)}

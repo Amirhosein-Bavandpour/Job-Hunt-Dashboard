@@ -123,8 +123,7 @@ const theme = createTheme({
         root: {
           color: '#22d3ee',
           fontWeight: 700,
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-          pb: 2,
+          pb: 1,
         },
       },
     },
