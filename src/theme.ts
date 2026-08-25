@@ -108,6 +108,43 @@ const theme = createTheme({
         },
       },
     },
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          background: 'rgba(2,6,23,0.97)',
+          border: '1px solid rgba(255,255,255,0.10)',
+          backdropFilter: 'blur(8px)',
+          boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
+        },
+      },
+    },
+    MuiDialogTitle: {
+      styleOverrides: {
+        root: {
+          color: '#22d3ee',
+          fontWeight: 700,
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          pb: 2,
+        },
+      },
+    },
+    MuiTextField: {
+      defaultProps: { variant: 'outlined' },
+      styleOverrides: {
+        root: {
+          '& .MuiInputLabel-root': { color: '#94a3b8' },
+          '& .MuiInputLabel-root.Mui-focused': { color: '#22d3ee' },
+          '& .MuiOutlinedInput-root': {
+            background: 'rgba(255,255,255,0.04)',
+            borderRadius: 12,
+            '& fieldset': { borderColor: 'rgba(255,255,255,0.12)' },
+            '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.25)' },
+            '&.Mui-focused fieldset': { borderColor: '#22d3ee' },
+          },
+          '& .MuiOutlinedInput-input': { color: '#f1f5f9' },
+        },
+      },
+    },
   },
 });
 

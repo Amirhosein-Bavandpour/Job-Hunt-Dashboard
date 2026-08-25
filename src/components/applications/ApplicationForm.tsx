@@ -121,7 +121,7 @@ export default function ApplicationForm({ open, onClose, editing }: Props) {
         </Stack>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose} color="inherit">Cancel</Button>
+        <Button onClick={onClose} color="primary" variant="outlined">Cancel</Button>
         <Button onClick={handleSubmit} variant="contained" disabled={busy || !form.company || !form.position}>
           {editing ? 'Save' : 'Add'}
         </Button>
