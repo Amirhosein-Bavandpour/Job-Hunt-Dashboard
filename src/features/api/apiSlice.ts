@@ -105,6 +105,20 @@ export const apiSlice = createApi({
       },
       invalidatesTags: ['Application', 'Stats'],
     }),
+    // ---- Mock auth (swap for fetchBaseQuery later) ----
+    login: builder.mutation<{ token: string; user: { id: string; name: string; email: string } }, { email: string; password: string }>({
+      queryFn: async ({ email }) => {
+        // mock: accept any credentials, return a fake JWT-shaped token
+        const token = `mock.${Buffer.from(email).toString('base64')}.jwt`;
+        return { data: { token, user: { id: 'u1', name: 'Amirhosein', email } } };
+      },
+    }),
+    register: builder.mutation<{ token: string; user: { id: string; name: string; email: string } }, { name: string; email: string; password: string }>({
+      queryFn: async ({ name, email }) => {
+        const token = `mock.${Buffer.from(email).toString('base64')}.jwt`;
+        return { data: { token, user: { id: 'u1', name, email } } };
+      },
+    }),
   }),
 });
 
@@ -115,4 +129,6 @@ export const {
   useAddApplicationMutation,
   useUpdateApplicationMutation,
   useDeleteApplicationMutation,
+  useLoginMutation,
+  useRegisterMutation,
 } = apiSlice;

@@ -19,6 +19,13 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { useSelector, useDispatch } from 'react-redux';
+import Button from '@mui/material/Button';
+import LogoutIcon from '@mui/icons-material/Logout';
+import Divider from '@mui/material/Divider';
+import RequireAuth from '@/components/auth/RequireAuth';
+import { logout } from '@/store/authSlice';
+import type { RootState } from '@/store';
 import { useDashboardUIStore } from '@/stores/dashboardUIStore';
 
 const DRAWER_WIDTH = 240;
@@ -35,6 +42,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const sidebarOpen = useDashboardUIStore((s) => s.sidebarOpen);
   const toggleSidebar = useDashboardUIStore((s) => s.toggleSidebar);
   const pathname = usePathname();
+  const user = useSelector((s: RootState) => s.auth.user);
+  const dispatch = useDispatch();
 
   const drawer = (
     <Box>
@@ -68,6 +77,23 @@ export default function AppShell({ children }: { children: ReactNode }) {
           </ListItemButton>
         ))}
       </List>
+
+      <Box sx={{ mt: 'auto', p: 2 }}>
+        <Divider sx={{ mb: 1.5 }} />
+        <Typography variant="body2" color="text.secondary" noWrap>
+          {user?.email}
+        </Typography>
+        <Button
+          fullWidth
+          color="primary"
+          variant="outlined"
+          startIcon={<LogoutIcon />}
+          onClick={() => dispatch(logout())}
+          sx={{ mt: 1 }}
+        >
+          Logout
+        </Button>
+      </Box>
     </Box>
   );
 
@@ -108,7 +134,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
-        {children}
+        <RequireAuth>{children}</RequireAuth>
       </Box>
     </Box>
   );
