@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
@@ -23,7 +23,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import Button from '@mui/material/Button';
 import LogoutIcon from '@mui/icons-material/Logout';
 import Divider from '@mui/material/Divider';
-import RequireAuth from '@/components/auth/RequireAuth';
 import { logout } from '@/store/authSlice';
 import type { RootState } from '@/store';
 import { useDashboardUIStore } from '@/stores/dashboardUIStore';
@@ -44,6 +43,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const user = useSelector((s: RootState) => s.auth.user);
   const dispatch = useDispatch();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const drawer = (
     <Box>
@@ -81,7 +82,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       <Box sx={{ mt: 'auto', p: 2 }}>
         <Divider sx={{ mb: 1.5 }} />
         <Typography variant="body2" color="text.secondary" noWrap>
-          {user?.email}
+          {mounted ? user?.email : ''}
         </Typography>
         <Button
           fullWidth
@@ -134,7 +135,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
-        <RequireAuth>{children}</RequireAuth>
+        {children}
       </Box>
     </Box>
   );

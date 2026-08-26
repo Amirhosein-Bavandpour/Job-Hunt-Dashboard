@@ -13,8 +13,18 @@ interface AuthState {
   user: AuthUser | null;
   token: string | null;
   isAuthenticated: boolean;
+  hydrated: boolean;
 }
 
+const initialState: AuthState = {
+  user: null,
+  token: null,
+  isAuthenticated: false,
+  hydrated: false,
+};
+
+// Hydrate from localStorage on the client (called once from a client effect to
+// avoid SSR/client hydration mismatch — never read localStorage during render).
 const loadToken = (): string | null => {
   if (typeof window === 'undefined') return null;
   return localStorage.getItem('jhd_token');
@@ -25,11 +35,13 @@ const loadUser = (): AuthUser | null => {
   return raw ? (JSON.parse(raw) as AuthUser) : null;
 };
 
-const initialState: AuthState = {
-  user: loadUser(),
-  token: loadToken(),
-  isAuthenticated: !!loadToken(),
-};
+export const hydrateAuth = () => ({
+  type: 'auth/hydrate' as const,
+  payload: {
+    user: loadUser(),
+    token: loadToken(),
+  },
+});
 
 const persist = (user: AuthUser | null, token: string | null) => {
   if (typeof window === 'undefined') return;
@@ -46,20 +58,28 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
+    hydrate: (state, action: PayloadAction<{ user: AuthUser | null; token: string | null }>) => {
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      state.isAuthenticated = !!action.payload.token;
+      state.hydrated = true;
+    },
     login: (state, action: PayloadAction<{ user: AuthUser; token: string }>) => {
       state.user = action.payload.user;
       state.token = action.payload.token;
       state.isAuthenticated = true;
+      state.hydrated = true;
       persist(action.payload.user, action.payload.token);
     },
     logout: (state) => {
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
+      state.hydrated = false;
       persist(null, null);
     },
   },
 });
 
-export const { login, logout } = authSlice.actions;
+export const { login, logout, hydrate } = authSlice.actions;
 export default authSlice.reducer;

@@ -12,12 +12,16 @@ import type { RootState } from '@/store';
 export default function RequireAuth({ children }: { children: ReactNode }) {
   const router = useRouter();
   const isAuthenticated = useSelector((s: RootState) => s.auth.isAuthenticated);
+  const hydrated = useSelector((s: RootState) => s.auth.hydrated);
 
   useEffect(() => {
-    if (!isAuthenticated) router.replace('/login');
-  }, [isAuthenticated, router]);
+    // Only redirect after we've read localStorage (hydration complete) to avoid
+    // a flash/redirect for users who ARE logged in.
+    if (hydrated && !isAuthenticated) router.replace('/login');
+  }, [hydrated, isAuthenticated, router]);
 
-  if (!isAuthenticated) {
+  // Before hydration, or while not authenticated, show the spinner.
+  if (!hydrated || !isAuthenticated) {
     return (
       <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <CircularProgress color="primary" />
