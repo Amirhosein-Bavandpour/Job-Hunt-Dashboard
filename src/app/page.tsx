@@ -35,8 +35,16 @@ export default function DashboardPage() {
   const { data: appsData, isLoading: appsLoading, isError: appsError, error: appsErr, requestId: appsRid } = apps;
 
   // TEMP DIAGNOSTICS (remove after fix)
-  console.log('[DIAG] stats', { isLoading: statsLoading, isError: statsError, rid: statsRid, data: statsData?.total });
-  console.log('[DIAG] apps', { isLoading: appsLoading, isError: appsError, rid: appsRid, count: appsData?.length });
+  console.log('[DIAG] stats FULL', {
+    status: stats.status, isLoading: stats.isLoading, isFetching: stats.isFetching,
+    isSuccess: stats.isSuccess, isError: stats.isError, rid: stats.requestId,
+    data: statsData?.total, started: stats.startedTimeStamp, fulfilled: stats.fulfilledTimeStamp,
+  });
+  console.log('[DIAG] apps FULL', {
+    status: apps.status, isLoading: apps.isLoading, isFetching: apps.isFetching,
+    isSuccess: apps.isSuccess, isError: apps.isError, rid: apps.requestId,
+    count: appsData?.length, started: apps.startedTimeStamp, fulfilled: apps.fulfilledTimeStamp,
+  });
   if (statsError || appsError) {
     return (
       <Box>
