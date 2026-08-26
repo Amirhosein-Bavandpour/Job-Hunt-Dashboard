@@ -8,6 +8,7 @@ import {
   AreaChart, Area,
 } from 'recharts';
 import { useGetAnalyticsQuery } from '@/features/api/apiSlice';
+import { STATUS_COLORS, STATUS_LABEL } from '@/lib/status';
 import type { ApplicationStatus } from '@/types';
 
 const fadeUp = {
@@ -15,25 +16,6 @@ const fadeUp = {
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, amount: 0.2 },
   transition: { duration: 0.7 },
-};
-
-// Status -> colour (cyan-leaning palette so it stays on-brand in both themes).
-const STATUS_COLORS: Record<ApplicationStatus, string> = {
-  saved: '#64748b',
-  applied: '#38bdf8',
-  screening: '#818cf8',
-  interview: '#22d3ee',
-  offer: '#34d399',
-  rejected: '#f87171',
-};
-
-const STATUS_LABEL: Record<ApplicationStatus, string> = {
-  saved: 'Saved',
-  applied: 'Applied',
-  screening: 'Screening',
-  interview: 'Interview',
-  offer: 'Offer',
-  rejected: 'Rejected',
 };
 
 // Recharts tooltip styled to match the glass theme.
@@ -91,12 +73,12 @@ export default function AnalyticsPage() {
                 <Typography variant="h6" sx={{ mb: 2 }}>Status breakdown</Typography>
                 <Box sx={{ height: 300 }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
+                    <PieChart margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
                       <Pie
                         data={statusData}
                         dataKey="count"
                         nameKey="status"
-                        cx="50%" cy="50%" innerRadius={60} outerRadius={95}
+                        cx="50%" cy="50%" innerRadius={55} outerRadius={80}
                         paddingAngle={3}
                         label={({ payload }: any) => payload ? `${STATUS_LABEL[payload.status as ApplicationStatus]} (${payload.count})` : ''}
                         labelLine={false}
@@ -109,17 +91,18 @@ export default function AnalyticsPage() {
                     </PieChart>
                   </ResponsiveContainer>
                 </Box>
-                <Stack direction="row" flexWrap="wrap" gap={1} sx={{ mt: 1 }}>
+                <Grid container spacing={1} sx={{ mt: 1 }}>
                   {statusData.map((s) => (
-                    <Chip
-                      key={s.status}
-                      size="small"
-                      label={`${STATUS_LABEL[s.status]}: ${s.count}`}
-                      sx={{ borderColor: STATUS_COLORS[s.status], color: STATUS_COLORS[s.status], background: 'transparent' }}
-                      variant="outlined"
-                    />
+                    <Grid item xs={6} sm={4} key={s.status}>
+                      <Chip
+                        size="small"
+                        label={`${STATUS_LABEL[s.status]}: ${s.count}`}
+                        sx={{ borderColor: STATUS_COLORS[s.status], color: STATUS_COLORS[s.status], background: 'transparent', width: '100%', justifyContent: 'center' }}
+                        variant="outlined"
+                      />
+                    </Grid>
                   ))}
-                </Stack>
+                </Grid>
               </CardContent>
             </Card>
           </motion.div>
@@ -133,7 +116,7 @@ export default function AnalyticsPage() {
                 <Typography variant="h6" sx={{ mb: 2 }}>Applications per month</Typography>
                 <Box sx={{ height: 300 }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={data.byMonth} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                    <AreaChart data={data.byMonth} margin={{ top: 10, right: 16, left: 0, bottom: 8 }}>
                       <defs>
                         <linearGradient id="gTotal" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.8} />
@@ -141,8 +124,8 @@ export default function AnalyticsPage() {
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)'} />
-                      <XAxis dataKey="month" stroke={axisColor} tick={{ fontSize: 12 }} />
-                      <YAxis stroke={axisColor} tick={{ fontSize: 12 }} allowDecimals={false} />
+                      <XAxis dataKey="month" stroke={axisColor} tick={{ fontSize: 12 }} tickMargin={8} />
+                      <YAxis stroke={axisColor} tick={{ fontSize: 12 }} allowDecimals={false} width={32} tickMargin={4} />
                       <Tooltip content={<GlassTooltip />} />
                       <Area type="monotone" dataKey="count" name="Applications" stroke="#22d3ee" fill="url(#gTotal)" strokeWidth={2} />
                     </AreaChart>
@@ -161,10 +144,10 @@ export default function AnalyticsPage() {
                 <Typography variant="h6" sx={{ mb: 2 }}>Status trend over time</Typography>
                 <Box sx={{ height: 320 }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={data.trend} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                    <BarChart data={data.trend} margin={{ top: 10, right: 16, left: 0, bottom: 8 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)'} />
-                      <XAxis dataKey="month" stroke={axisColor} tick={{ fontSize: 12 }} />
-                      <YAxis stroke={axisColor} tick={{ fontSize: 12 }} allowDecimals={false} />
+                      <XAxis dataKey="month" stroke={axisColor} tick={{ fontSize: 12 }} tickMargin={8} />
+                      <YAxis stroke={axisColor} tick={{ fontSize: 12 }} allowDecimals={false} width={32} tickMargin={4} />
                       <Tooltip content={<GlassTooltip />} />
                       <Legend wrapperStyle={{ fontSize: 12 }} />
                       <Bar dataKey="applied" name="Applied" stackId="s" fill={STATUS_COLORS.applied} radius={[0,0,0,0]} />

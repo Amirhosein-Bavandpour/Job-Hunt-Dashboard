@@ -7,6 +7,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import EventIcon from '@mui/icons-material/Event';
 import { useGetCalendarEventsQuery } from '@/features/api/apiSlice';
+import { STATUS_COLORS } from '@/lib/status';
 import type { ApplicationStatus, CalendarEvent } from '@/types';
 
 const fadeUp = {
@@ -14,15 +15,6 @@ const fadeUp = {
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, amount: 0.2 },
   transition: { duration: 0.7 },
-};
-
-const STATUS_COLOR: Record<ApplicationStatus, string> = {
-  saved: '#64748b',
-  applied: '#38bdf8',
-  screening: '#818cf8',
-  interview: '#22d3ee',
-  offer: '#34d399',
-  rejected: '#f87171',
 };
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -90,7 +82,7 @@ export default function CalendarPage() {
             <Grid container sx={{ mb: 1 }}>
               {WEEKDAYS.map((d) => (
                 <Grid item xs={12 / 7} key={d}>
-                  <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', display: 'block', fontWeight: 600 }}>
+                  <Typography variant="caption" color="primary" sx={{ textAlign: 'center', display: 'block', fontWeight: 700, letterSpacing: '0.05em' }}>
                     {d}
                   </Typography>
                 </Grid>
@@ -112,7 +104,7 @@ export default function CalendarPage() {
                         borderColor: isToday ? 'primary.main' : 'rgba(255,255,255,0.06)',
                         borderRadius: 2,
                         background: inMonth ? 'transparent' : 'rgba(255,255,255,0.02)',
-                        opacity: inMonth ? 1 : 0.4,
+                        opacity: inMonth ? 1 : 0.55,
                         transition: 'border-color .2s',
                         '&:hover': { borderColor: 'rgba(34,211,238,0.5)' },
                       }}
@@ -136,10 +128,11 @@ export default function CalendarPage() {
                               sx={{
                                 height: 20,
                                 fontSize: 11,
-                                borderColor: STATUS_COLOR[e.status],
-                                color: STATUS_COLOR[e.status],
+                                opacity: inMonth ? 1 : 0.7,
+                                borderColor: STATUS_COLORS[e.status],
+                                color: STATUS_COLORS[e.status],
                                 background: 'transparent',
-                                '& .MuiChip-icon': { color: STATUS_COLOR[e.status] },
+                                '& .MuiChip-icon': { color: STATUS_COLORS[e.status] },
                                 '& .MuiChip-label': { px: 0.5 },
                               }}
                               variant="outlined"

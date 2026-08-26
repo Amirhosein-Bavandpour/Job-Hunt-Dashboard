@@ -54,3 +54,17 @@ export interface CalendarEvent {
 }
 
 export type ThemeMode = 'dark' | 'light';
+
+// Aggregated company view derived from applications.
+export interface CompanySummary {
+  name: string;
+  applications: number;
+  positions: string[];
+  statuses: ApplicationStatus[];
+  latestStatus: ApplicationStatus;
+  workModes: ('remote' | 'hybrid' | 'onsite')[];
+  locations: string[];
+  bestSalary: number;
+  hasOffer: boolean;
+  hasInterview: boolean;
+}

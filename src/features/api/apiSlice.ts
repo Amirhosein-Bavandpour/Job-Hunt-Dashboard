@@ -1,5 +1,5 @@
 import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { JobApplication, DashboardStats, AnalyticsData, CalendarEvent } from '@/types';
+import type { JobApplication, DashboardStats, AnalyticsData, CalendarEvent, CompanySummary } from '@/types';
 
 // MOCK backend for v1.
 // We use fakeBaseQuery + a local in-memory store so RTK Query's caching,
@@ -138,6 +138,36 @@ export const apiSlice = createApi({
       },
       providesTags: ['Application'],
     }),
+    // ---- Phase 6: Companies (aggregated from applications) ----
+    getCompanies: builder.query<CompanySummary[], void>({
+      queryFn: async () => {
+        const map = new Map<string, JobApplication[]>();
+        for (const a of db) {
+          if (!map.has(a.company)) map.set(a.company, []);
+          map.get(a.company)!.push(a);
+        }
+        const summaries: CompanySummary[] = [...map.entries()].map(([name, apps]) => ({
+          name,
+          applications: apps.length,
+          positions: [...new Set(apps.map((a) => a.position))],
+          statuses: apps.map((a) => a.status),
+          latestStatus: apps[0]?.status ?? 'saved',
+          workModes: [...new Set(apps.map((a) => a.workMode))],
+          locations: [...new Set(apps.map((a) => a.location).filter(Boolean) as string[])],
+          bestSalary: apps.reduce((m, a) => Math.max(m, a.salary ?? 0), 0),
+          hasOffer: apps.some((a) => a.status === 'offer'),
+          hasInterview: apps.some((a) => a.status === 'interview'),
+        }));
+        // Sort: companies with offers/interviews first, then by application count.
+        summaries.sort((a, b) => {
+          if (a.hasOffer !== b.hasOffer) return a.hasOffer ? -1 : 1;
+          if (a.hasInterview !== b.hasInterview) return a.hasInterview ? -1 : 1;
+          return b.applications - a.applications;
+        });
+        return { data: summaries };
+      },
+      providesTags: ['Application'],
+    }),
     addApplication: builder.mutation<JobApplication, Partial<JobApplication>>({
       queryFn: async (input) => {
         const created: JobApplication = {
@@ -199,6 +229,7 @@ export const {
   useGetDashboardStatsQuery,
   useGetAnalyticsQuery,
   useGetCalendarEventsQuery,
+  useGetCompaniesQuery,
   useAddApplicationMutation,
   useUpdateApplicationMutation,
   useDeleteApplicationMutation,
