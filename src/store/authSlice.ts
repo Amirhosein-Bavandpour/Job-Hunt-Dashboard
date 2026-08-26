@@ -75,7 +75,10 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
-      state.hydrated = false;
+      // NOTE: keep hydrated=true so RequireAuth's redirect effect fires
+      // (if we reset it to false, the redirect guard `hydrated && !isAuthenticated`
+      // never triggers and the spinner shows forever after logout).
+      state.hydrated = true;
       persist(null, null);
     },
   },
