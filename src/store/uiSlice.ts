@@ -1,16 +1,15 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-// Minimal Redux UI/business state that is NOT ephemeral enough for Zustand
-// and NOT server state (so not RTK Query).
-// Example: a global "selected application id" used across pages, or a saved view mode.
+// Redux holds genuine GLOBAL BUSINESS state only.
+// NOTE: view mode (table/kanban) is intentionally NOT here — it's ephemeral
+// UI state, so it lives in Zustand (dashboardUIStore.kanbanMode). This avoids
+// the anti-pattern of two stores owning the same piece of state.
 interface UiState {
   selectedApplicationId: string | null;
-  applicationView: 'table' | 'kanban';
 }
 
 const initialState: UiState = {
   selectedApplicationId: null,
-  applicationView: 'table',
 };
 
 const uiSlice = createSlice({
@@ -20,11 +19,8 @@ const uiSlice = createSlice({
     setSelectedApplication: (state, action: PayloadAction<string | null>) => {
       state.selectedApplicationId = action.payload;
     },
-    setApplicationView: (state, action: PayloadAction<'table' | 'kanban'>) => {
-      state.applicationView = action.payload;
-    },
   },
 });
 
-export const { setSelectedApplication, setApplicationView } = uiSlice.actions;
+export const { setSelectedApplication } = uiSlice.actions;
 export default uiSlice.reducer;

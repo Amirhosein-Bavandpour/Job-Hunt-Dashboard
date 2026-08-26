@@ -17,6 +17,10 @@ import {
 import type { JobApplication, ApplicationStatus } from '@/types';
 import ApplicationForm from '@/components/applications/ApplicationForm';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
+import KanbanBoard from '@/components/applications/KanbanBoard';
+import { useDashboardUIStore } from '@/stores/dashboardUIStore';
+import ViewModuleIcon from '@mui/icons-material/ViewModule';
+import ViewListIcon from '@mui/icons-material/ViewList';
 
 const STATUSES: ApplicationStatus[] = [
   'saved', 'applied', 'screening', 'interview', 'offer', 'rejected',
@@ -38,6 +42,8 @@ export default function ApplicationsPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<JobApplication | null>(null);
   const [pendingDelete, setPendingDelete] = useState<JobApplication | null>(null);
+  const kanbanMode = useDashboardUIStore((s) => s.kanbanMode);
+  const setKanbanMode = useDashboardUIStore((s) => s.setKanbanMode);
 
   const filtered = useMemo(() => {
     let list = [...apps];
@@ -100,9 +106,18 @@ export default function ApplicationsPage() {
           <Typography variant="overline" color="primary">Track</Typography>
           <Typography variant="h4">Applications</Typography>
         </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={openAdd}>
-          Add Application
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <Button
+            variant="outlined" color="primary"
+            startIcon={kanbanMode ? <ViewListIcon /> : <ViewModuleIcon />}
+            onClick={() => setKanbanMode(!kanbanMode)}
+          >
+            {kanbanMode ? 'Table' : 'Kanban'}
+          </Button>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={openAdd}>
+            Add Application
+          </Button>
+        </Stack>
       </Stack>
 
       {/* Controls */}
@@ -123,61 +138,67 @@ export default function ApplicationsPage() {
         </TextField>
       </Stack>
 
-      {/* Table */}
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>
-              <TableSortLabel active={sortKey === 'company'} direction={sortDir}
-                onClick={() => handleSort('company')}>Company</TableSortLabel>
-            </TableCell>
-            <TableCell>
-              <TableSortLabel active={sortKey === 'position'} direction={sortDir}
-                onClick={() => handleSort('position')}>Position</TableSortLabel>
-            </TableCell>
-            <TableCell>
-              <TableSortLabel active={sortKey === 'status'} direction={sortDir}
-                onClick={() => handleSort('status')}>Status</TableSortLabel>
-            </TableCell>
-            <TableCell>Location</TableCell>
-            <TableCell>
-              <TableSortLabel active={sortKey === 'appliedAt'} direction={sortDir}
-                onClick={() => handleSort('appliedAt')}>Applied</TableSortLabel>
-            </TableCell>
-            <TableCell align="right">Actions</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {paged.map((a) => (
-            <TableRow key={a.id} hover>
-              <TableCell>{a.company}</TableCell>
-              <TableCell>{a.position}</TableCell>
-              <TableCell><Chip label={a.status} size="small" /></TableCell>
-              <TableCell>{a.location} · {a.workMode}</TableCell>
-              <TableCell>{a.appliedAt ?? '—'}</TableCell>
-              <TableCell align="right">
-                <IconButton size="small" onClick={() => openEdit(a)}><EditIcon fontSize="small" /></IconButton>
-                <IconButton size="small" color="error" onClick={() => handleDelete(a)}><DeleteIcon fontSize="small" /></IconButton>
-              </TableCell>
-            </TableRow>
-          ))}
-          {paged.length === 0 && (
-            <TableRow><TableCell colSpan={6}>
-              <Alert severity="info">No applications match your filters.</Alert>
-            </TableCell></TableRow>
-          )}
-        </TableBody>
-      </Table>
+      {kanbanMode ? (
+        <KanbanBoard onEdit={openEdit} onDelete={handleDelete} />
+      ) : (
+        <>
+          {/* Table */}
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  <TableSortLabel active={sortKey === 'company'} direction={sortDir}
+                    onClick={() => handleSort('company')}>Company</TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel active={sortKey === 'position'} direction={sortDir}
+                    onClick={() => handleSort('position')}>Position</TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel active={sortKey === 'status'} direction={sortDir}
+                    onClick={() => handleSort('status')}>Status</TableSortLabel>
+                </TableCell>
+                <TableCell>Location</TableCell>
+                <TableCell>
+                  <TableSortLabel active={sortKey === 'appliedAt'} direction={sortDir}
+                    onClick={() => handleSort('appliedAt')}>Applied</TableSortLabel>
+                </TableCell>
+                <TableCell align="right">Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paged.map((a) => (
+                <TableRow key={a.id} hover>
+                  <TableCell>{a.company}</TableCell>
+                  <TableCell>{a.position}</TableCell>
+                  <TableCell><Chip label={a.status} size="small" /></TableCell>
+                  <TableCell>{a.location} · {a.workMode}</TableCell>
+                  <TableCell>{a.appliedAt ?? '—'}</TableCell>
+                  <TableCell align="right">
+                    <IconButton size="small" onClick={() => openEdit(a)}><EditIcon fontSize="small" /></IconButton>
+                    <IconButton size="small" color="error" onClick={() => handleDelete(a)}><DeleteIcon fontSize="small" /></IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {paged.length === 0 && (
+                <TableRow><TableCell colSpan={6}>
+                  <Alert severity="info">No applications match your filters.</Alert>
+                </TableCell></TableRow>
+              )}
+            </TableBody>
+          </Table>
 
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2 }}>
-        <Typography variant="body2" color="text.secondary">
-          {filtered.length} result{filtered.length !== 1 ? 's' : ''}
-        </Typography>
-        <Pagination
-          count={pageCount} page={safePage}
-          onChange={(_, p) => setPage(p)} color="primary" size="small"
-        />
-      </Stack>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+            </Typography>
+            <Pagination
+              count={pageCount} page={safePage}
+              onChange={(_, p) => setPage(p)} color="primary" size="small"
+            />
+          </Stack>
+        </>
+      )}
 
       <ApplicationForm open={formOpen} onClose={() => setFormOpen(false)} editing={editing} />
 
