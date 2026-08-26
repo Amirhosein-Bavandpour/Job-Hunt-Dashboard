@@ -5,6 +5,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Card, CardContent, Stack, Box, Typography, Chip, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import NotesIcon from '@mui/icons-material/Notes';
 import type { JobApplication } from '@/types';
 
 interface Props {
@@ -48,6 +49,12 @@ export default function ApplicationCard({ app, onEdit, onDelete }: Props) {
         </Typography>
         {app.salary != null && (
           <Chip label={`$${app.salary.toLocaleString()}`} size="small" sx={{ mt: 1 }} />
+        )}
+        {app.interviewNotes && (
+          <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 0.5, color: 'primary.main' }}>
+            <NotesIcon fontSize="small" />
+            <Typography variant="caption">Interview prep added</Typography>
+          </Box>
         )}
       </CardContent>
     </Card>

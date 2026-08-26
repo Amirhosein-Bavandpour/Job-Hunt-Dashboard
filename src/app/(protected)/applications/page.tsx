@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, Fragment } from 'react';
 import {
   Box, Typography, TextField, MenuItem, Button, Stack,
   Table, TableHead, TableRow, TableCell, TableBody, TableSortLabel,
@@ -10,6 +10,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import {
   useGetApplicationsQuery,
   useDeleteApplicationMutation,
@@ -44,6 +46,7 @@ export default function ApplicationsPage() {
   const [pendingDelete, setPendingDelete] = useState<JobApplication | null>(null);
   const kanbanMode = useDashboardUIStore((s) => s.kanbanMode);
   const setKanbanMode = useDashboardUIStore((s) => s.setKanbanMode);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     let list = [...apps];
@@ -168,17 +171,51 @@ export default function ApplicationsPage() {
             </TableHead>
             <TableBody>
               {paged.map((a) => (
-                <TableRow key={a.id} hover>
-                  <TableCell>{a.company}</TableCell>
-                  <TableCell>{a.position}</TableCell>
-                  <TableCell><Chip label={a.status} size="small" /></TableCell>
-                  <TableCell>{a.location} · {a.workMode}</TableCell>
-                  <TableCell>{a.appliedAt ?? '—'}</TableCell>
-                  <TableCell align="right">
-                    <IconButton size="small" onClick={() => openEdit(a)}><EditIcon fontSize="small" /></IconButton>
-                    <IconButton size="small" color="error" onClick={() => handleDelete(a)}><DeleteIcon fontSize="small" /></IconButton>
-                  </TableCell>
-                </TableRow>
+                <Fragment key={a.id}>
+                  <TableRow hover>
+                    <TableCell>{a.company}</TableCell>
+                    <TableCell>{a.position}</TableCell>
+                    <TableCell><Chip label={a.status} size="small" /></TableCell>
+                    <TableCell>{a.location} · {a.workMode}</TableCell>
+                    <TableCell>{a.appliedAt ?? '—'}</TableCell>
+                    <TableCell align="right">
+                      <IconButton size="small" onClick={() => setExpandedId(expandedId === a.id ? null : a.id)}>
+                        {expandedId === a.id ? <KeyboardArrowUpIcon fontSize="small" /> : <KeyboardArrowDownIcon fontSize="small" />}
+                      </IconButton>
+                      <IconButton size="small" onClick={() => openEdit(a)}><EditIcon fontSize="small" /></IconButton>
+                      <IconButton size="small" color="error" onClick={() => handleDelete(a)}><DeleteIcon fontSize="small" /></IconButton>
+                    </TableCell>
+                  </TableRow>
+                  {expandedId === a.id && (
+                    <TableRow>
+                      <TableCell colSpan={6} sx={{ bgcolor: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                        <Stack spacing={2} sx={{ py: 1 }}>
+                          {a.notes && (
+                            <Box>
+                              <Typography variant="caption" color="primary" sx={{ fontWeight: 600 }}>Notes</Typography>
+                              <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{a.notes}</Typography>
+                            </Box>
+                          )}
+                          {a.interviewNotes && (
+                            <Box>
+                              <Typography variant="caption" color="primary" sx={{ fontWeight: 600 }}>Interview Prep</Typography>
+                              <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{a.interviewNotes}</Typography>
+                            </Box>
+                          )}
+                          {a.jobUrl && (
+                            <Box>
+                              <Typography variant="caption" color="primary" sx={{ fontWeight: 600 }}>Job URL</Typography>
+                              <Typography variant="body2"><a href={a.jobUrl} target="_blank" rel="noreferrer" style={{ color: '#22d3ee' }}>{a.jobUrl}</a></Typography>
+                            </Box>
+                          )}
+                          {!a.notes && !a.interviewNotes && !a.jobUrl && (
+                            <Typography variant="body2" color="text.secondary">No notes or details added.</Typography>
+                          )}
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </Fragment>
               ))}
               {paged.length === 0 && (
                 <TableRow><TableCell colSpan={6}>

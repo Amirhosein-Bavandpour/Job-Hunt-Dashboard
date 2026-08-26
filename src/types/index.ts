@@ -17,6 +17,7 @@ export interface JobApplication {
   workMode: 'remote' | 'hybrid' | 'onsite';
   jobUrl?: string;
   notes?: string;
+  interviewNotes?: string; // prep notes for the interview (questions, research, talking points)
   appliedAt?: string;
   interviewDate?: string; // YYYY-MM-DD — drives the Calendar view
   createdAt: string;

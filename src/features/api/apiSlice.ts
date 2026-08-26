@@ -14,6 +14,8 @@ const db: JobApplication[] = [
     status: 'interview', salary: 45000, location: 'Tehran', workMode: 'hybrid',
     jobUrl: 'https://acme.example.com/job', appliedAt: '2026-08-10',
     interviewDate: '2026-08-28',
+    notes: 'Referred by former colleague. Strong focus on design systems.',
+    interviewNotes: 'Q: How do you scale a component library?\nPrep: their StackBlitz take-home.\nResearch: their recent migration to MUI v6.',
     createdAt: '2026-08-09',
   },
   {

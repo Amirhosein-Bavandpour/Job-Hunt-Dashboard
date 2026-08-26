@@ -32,12 +32,13 @@ type FormState = {
   workMode: 'remote' | 'hybrid' | 'onsite';
   jobUrl: string;
   notes: string;
+  interviewNotes: string;
   appliedAt: string;
 };
 
 const empty: FormState = {
   company: '', position: '', status: 'saved', salary: '',
-  location: '', workMode: 'remote', jobUrl: '', notes: '', appliedAt: '',
+  location: '', workMode: 'remote', jobUrl: '', notes: '', interviewNotes: '', appliedAt: '',
 };
 
 export default function ApplicationForm({ open, onClose, editing }: Props) {
@@ -57,6 +58,7 @@ export default function ApplicationForm({ open, onClose, editing }: Props) {
         workMode: editing.workMode,
         jobUrl: editing.jobUrl ?? '',
         notes: editing.notes ?? '',
+        interviewNotes: editing.interviewNotes ?? '',
         appliedAt: editing.appliedAt ?? '',
       });
     } else {
@@ -76,6 +78,7 @@ export default function ApplicationForm({ open, onClose, editing }: Props) {
       workMode: form.workMode,
       jobUrl: form.jobUrl || undefined,
       notes: form.notes || undefined,
+      interviewNotes: form.interviewNotes || undefined,
       appliedAt: form.appliedAt || undefined,
       salary: form.salary ? Number(form.salary) : undefined,
     };
@@ -118,6 +121,9 @@ export default function ApplicationForm({ open, onClose, editing }: Props) {
             onChange={(e) => set('jobUrl', e.target.value)} fullWidth />
           <TextField label="Notes" value={form.notes}
             onChange={(e) => set('notes', e.target.value)} multiline rows={3} fullWidth />
+          <TextField label="Interview Prep Notes" value={form.interviewNotes}
+            onChange={(e) => set('interviewNotes', e.target.value)} multiline rows={3} fullWidth
+            helperText="Questions to ask, company research, talking points" />
         </Stack>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
