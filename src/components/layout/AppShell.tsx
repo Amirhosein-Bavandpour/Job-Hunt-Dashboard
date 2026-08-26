@@ -23,9 +23,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import Button from '@mui/material/Button';
 import LogoutIcon from '@mui/icons-material/Logout';
 import Divider from '@mui/material/Divider';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { logout } from '@/store/authSlice';
 import type { RootState } from '@/store';
 import { useDashboardUIStore } from '@/stores/dashboardUIStore';
+import { useThemeMode } from '@/store/ThemeModeProvider';
 
 const DRAWER_WIDTH = 240;
 
@@ -40,6 +43,7 @@ const navItems = [
 export default function AppShell({ children }: { children: ReactNode }) {
   const sidebarOpen = useDashboardUIStore((s) => s.sidebarOpen);
   const toggleSidebar = useDashboardUIStore((s) => s.toggleSidebar);
+  const { mode, toggleMode } = useThemeMode();
   const pathname = usePathname();
   const user = useSelector((s: RootState) => s.auth.user);
   const dispatch = useDispatch();
@@ -117,6 +121,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
           <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 700 }} noWrap component="div">
             Job Hunt Dashboard
           </Typography>
+          <Box sx={{ flexGrow: 1 }} />
+          <IconButton color="inherit" onClick={toggleMode} aria-label="toggle theme" sx={{ ml: 1 }}>
+            {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+          </IconButton>
         </Toolbar>
       </AppBar>
 
