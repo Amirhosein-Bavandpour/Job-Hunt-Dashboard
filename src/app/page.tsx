@@ -53,7 +53,18 @@ export default function DashboardPage() {
       </Box>
     );
   }
-  if (statsLoading || appsLoading) return <Typography>Loading dashboard…</Typography>;
+  // TEMP DIAGNOSTICS (remove after fix) - visible on screen
+  if (statsLoading || appsLoading) {
+    return (
+      <Box>
+        <Typography>Loading dashboard…</Typography>
+        <Typography variant="caption" color="text.secondary">
+          [DIAG] stats.status={stats.status} fetch={String(stats.isFetching)} rid={stats.requestId?.slice(0,8)} |
+          apps.status={apps.status} fetch={String(apps.isFetching)} rid={apps.requestId?.slice(0,8)}
+        </Typography>
+      </Box>
+    );
+  }
 
   // EPHEMERAL UI state via Zustand (just demonstrating the separation).
   const kanbanMode = useDashboardUIStore((s) => s.kanbanMode);
