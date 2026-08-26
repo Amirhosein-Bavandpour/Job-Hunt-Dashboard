@@ -29,14 +29,26 @@ function StatCard({ label, value }: { label: string; value: number | string }) {
 
 export default function DashboardPage() {
   // SERVER STATE via RTK Query -> caching/loading/error handled for us.
-  const { data: stats, isLoading, isError } = useGetDashboardStatsQuery();
-  const { data: apps } = useGetApplicationsQuery();
+  const stats = useGetDashboardStatsQuery();
+  const apps = useGetApplicationsQuery();
+  const { data: statsData, isLoading: statsLoading, isError: statsError, error: statsErr, requestId: statsRid } = stats;
+  const { data: appsData, isLoading: appsLoading, isError: appsError, error: appsErr, requestId: appsRid } = apps;
+
+  // TEMP DIAGNOSTICS (remove after fix)
+  console.log('[DIAG] stats', { isLoading: statsLoading, isError: statsError, rid: statsRid, data: statsData?.total });
+  console.log('[DIAG] apps', { isLoading: appsLoading, isError: appsError, rid: appsRid, count: appsData?.length });
+  if (statsError || appsError) {
+    return (
+      <Box>
+        <Typography color="error">Stats error: {JSON.stringify(statsErr)}</Typography>
+        <Typography color="error">Apps error: {JSON.stringify(appsErr)}</Typography>
+      </Box>
+    );
+  }
+  if (statsLoading || appsLoading) return <Typography>Loading dashboard…</Typography>;
 
   // EPHEMERAL UI state via Zustand (just demonstrating the separation).
   const kanbanMode = useDashboardUIStore((s) => s.kanbanMode);
-
-  if (isLoading) return <Typography>Loading dashboard…</Typography>;
-  if (isError) return <Typography color="error">Failed to load stats.</Typography>;
 
   return (
     <Box>
@@ -50,12 +62,12 @@ export default function DashboardPage() {
       </motion.div>
 
       <Grid container spacing={2} sx={{ mt: 1, mb: 3 }}>
-        <Grid item xs={6} md={2}><motion.div {...fadeUp}><StatCard label="Total" value={stats?.total ?? 0} /></motion.div></Grid>
-        <Grid item xs={6} md={2}><motion.div {...fadeUp}><StatCard label="Interviews" value={stats?.interviews ?? 0} /></motion.div></Grid>
-        <Grid item xs={6} md={2}><motion.div {...fadeUp}><StatCard label="Offers" value={stats?.offers ?? 0} /></motion.div></Grid>
-        <Grid item xs={6} md={2}><motion.div {...fadeUp}><StatCard label="Rejected" value={stats?.rejected ?? 0} /></motion.div></Grid>
-        <Grid item xs={6} md={2}><motion.div {...fadeUp}><StatCard label="This Month" value={stats?.thisMonth ?? 0} /></motion.div></Grid>
-        <Grid item xs={6} md={2}><motion.div {...fadeUp}><StatCard label="Upcoming" value={stats?.upcoming ?? 0} /></motion.div></Grid>
+        <Grid item xs={6} md={2}><motion.div {...fadeUp}><StatCard label="Total" value={statsData?.total ?? 0} /></motion.div></Grid>
+        <Grid item xs={6} md={2}><motion.div {...fadeUp}><StatCard label="Interviews" value={statsData?.interviews ?? 0} /></motion.div></Grid>
+        <Grid item xs={6} md={2}><motion.div {...fadeUp}><StatCard label="Offers" value={statsData?.offers ?? 0} /></motion.div></Grid>
+        <Grid item xs={6} md={2}><motion.div {...fadeUp}><StatCard label="Rejected" value={statsData?.rejected ?? 0} /></motion.div></Grid>
+        <Grid item xs={6} md={2}><motion.div {...fadeUp}><StatCard label="This Month" value={statsData?.thisMonth ?? 0} /></motion.div></Grid>
+        <Grid item xs={6} md={2}><motion.div {...fadeUp}><StatCard label="Upcoming" value={statsData?.upcoming ?? 0} /></motion.div></Grid>
       </Grid>
 
       <Divider sx={{ my: 2 }} />
@@ -66,7 +78,7 @@ export default function DashboardPage() {
       </Stack>
 
       <Stack spacing={1}>
-        {(apps ?? []).slice(0, 5).map((a, i) => (
+        {(appsData ?? []).slice(0, 5).map((a, i) => (
           <motion.div key={a.id} {...fadeUp} transition={{ duration: 0.7, delay: i * 0.05 }}>
             <Card variant="outlined">
               <CardContent>
