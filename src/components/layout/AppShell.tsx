@@ -32,6 +32,17 @@ import { useThemeMode } from '@/store/ThemeModeProvider';
 
 const DRAWER_WIDTH = 240;
 
+// Logout: clear the httpOnly JWT cookie on the server, then clear client state.
+async function handleLogout(dispatch: ReturnType<typeof useDispatch>) {
+  try {
+    await fetch('/api/auth/logout', { method: 'POST' });
+  } catch {
+    // Network error — still clear client state so the UI logs out locally.
+  }
+  dispatch(logout());
+  window.location.href = '/login';
+}
+
 const navItems = [
   { label: 'Dashboard', href: '/', icon: <DashboardIcon /> },
   { label: 'Applications', href: '/applications', icon: <WorkIcon /> },
@@ -93,7 +104,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           color="primary"
           variant="outlined"
           startIcon={<LogoutIcon />}
-          onClick={() => dispatch(logout())}
+          onClick={() => handleLogout(dispatch)}
           sx={{ mt: 1 }}
         >
           Logout

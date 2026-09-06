@@ -24,7 +24,9 @@ function ThemedApp({ children }: { children: ReactNode }) {
 }
 
 export function AppProviders({ children }: { children: ReactNode }) {
-  // Hydrate auth from localStorage AFTER mount (avoids SSR hydration mismatch).
+  // After mount on the client, confirm the session with the real backend via
+  // the httpOnly JWT cookie (GET /api/auth/me). On the server we can't call the
+  // API, so auth starts as logged out and the client confirms after hydration.
   useEffect(() => {
     store.dispatch(hydrateAuth());
   }, []);
