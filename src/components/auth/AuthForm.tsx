@@ -34,8 +34,12 @@ export default function AuthForm({ mode }: Props) {
           : await register({ name, email, password }).unwrap();
       dispatch(loginAction({ user: result.user, token: result.token }));
       router.push('/');
-    } catch {
-      setError('Something went wrong. Try again.');
+    } catch (err) {
+      // fetchBaseQuery rejects with { status, data } — the API returns
+      // { error: '...' }, so surface the real message (wrong password,
+      // account exists, ...) instead of a generic one.
+      const serverMsg = (err as { data?: { error?: string } })?.data?.error;
+      setError(serverMsg ?? 'Something went wrong. Try again.');
     }
   };
 

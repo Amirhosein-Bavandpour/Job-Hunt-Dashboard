@@ -48,13 +48,15 @@ export const apiSlice = createApi({
         total: number;
         statusCounts: Record<string, number>;
         trend: { date: string; count: number }[];
+        statusTrend: { month: string; applied: number; interview: number; offer: number; rejected: number }[];
+        thisMonth: number;
         avgSalary: number;
       }): { total: number; interviews: number; offers: number; rejected: number; thisMonth: number; upcoming: number } => ({
         total: response.total,
         interviews: response.statusCounts['interview'] ?? 0,
         offers: response.statusCounts['offer'] ?? 0,
         rejected: response.statusCounts['rejected'] ?? 0,
-        thisMonth: response.trend.filter((t) => t.date.startsWith('2026-09')).reduce((s, t) => s + t.count, 0),
+        thisMonth: response.thisMonth ?? 0,
         upcoming: response.statusCounts['interview'] ?? 0,
       }),
     }),
@@ -66,6 +68,8 @@ export const apiSlice = createApi({
         total: number;
         statusCounts: Record<string, number>;
         trend: { date: string; count: number }[];
+        statusTrend: { month: string; applied: number; interview: number; offer: number; rejected: number }[];
+        thisMonth: number;
         avgSalary: number;
       }): AnalyticsData => {
         const statuses: JobApplication['status'][] = [
@@ -78,7 +82,7 @@ export const apiSlice = createApi({
 
         // Applications per month from trend dates
         const monthMap = new Map<string, number>();
-        for (const t of response.trend) {
+        for (const t of response.trend ?? []) {
           const m = t.date.slice(0, 7);
           if (!m) continue;
           monthMap.set(m, (monthMap.get(m) ?? 0) + t.count);
@@ -87,14 +91,13 @@ export const apiSlice = createApi({
           .sort(([a], [b]) => a.localeCompare(b))
           .map(([month, count]) => ({ month, count }));
 
-        // Status trend: synthesise a per-month total (single series) for the stacked bar.
-        const trend = response.trend.map((t) => ({
-          month: t.date.slice(0, 7),
-          applied: 0,
-          interview: 0,
-          offer: 0,
-          rejected: 0,
-          total: t.count,
+        // Real per-status-per-month trend from the server (stacked bar).
+        const trend = (response.statusTrend ?? []).map((t) => ({
+          month: t.month,
+          applied: t.applied,
+          interview: t.interview,
+          offer: t.offer,
+          rejected: t.rejected,
         }));
 
         return { byStatus, byMonth, trend };
@@ -135,6 +138,9 @@ export const apiSlice = createApi({
         method: 'POST',
         body: input,
       }),
+      // POST /api/apps returns { ok, app } — unwrap the record.
+      transformResponse: (res: { ok: boolean; app: JobApplication } | JobApplication) =>
+        'app' in res ? res.app : res,
       invalidatesTags: ['Application', 'Stats'],
     }),
 
@@ -147,6 +153,9 @@ export const apiSlice = createApi({
         method: 'PUT',
         body: { id, ...patch },
       }),
+      // PUT /api/apps returns { ok, app } — unwrap the record.
+      transformResponse: (res: { ok: boolean; app: JobApplication } | JobApplication) =>
+        'app' in res ? res.app : res,
       invalidatesTags: (_res, _err, arg) => [
         { type: 'Application', id: arg.id },
         'Application',

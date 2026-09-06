@@ -6,6 +6,13 @@
       "email": "asd@gmail.com",
       "password": "$2b$10$60kdGBZCLpRJIiJOQNYMceE1T8l7.Ph8Uzo3W0H.7uKnc1UI4Wrnq",
       "createdAt": "2026-09-06T12:47:58.374Z"
+    },
+    {
+      "id": "u_1788702196613",
+      "name": "Smoke",
+      "email": "smoke@test.dev",
+      "password": "$2b$10$rRwN2l87DxmjRLj8tDG3zuw6UfiUYw.EfAHUq8OCHBzsdfuOvwEIa",
+      "createdAt": "2026-09-06T13:43:16.613Z"
     }
   ],
   "apps": [
@@ -24,31 +31,14 @@
       "createdAt": "2026-09-01T10:00:00Z"
     },
     {
-      "id": "2",
-      "company": "Beta Inc",
-      "position": "React Developer",
-      "status": "applied",
-      "salary": 42000,
-      "location": "Tehran",
-      "workMode": "remote",
-      "jobUrl": "https://beta.example.com/job",
-      "notes": "Remote-friendly; good benefits.",
-      "interviewNotes": "Research: they use Next.js 14 + Tailwind. Question to ask: how do you handle SSR vs CSR split?",
-      "appliedAt": "2026-09-03",
-      "createdAt": "2026-09-03T10:00:00Z"
-    },
-    {
-      "id": "3",
-      "company": "Gamma LLC",
-      "position": "UI Engineer",
+      "id": "a_1788701823365",
+      "company": "asd",
+      "position": "asdasd",
       "status": "saved",
-      "salary": 38000,
-      "location": "Tehran",
-      "workMode": "on-site",
-      "jobUrl": "https://gamma.example.com/job",
-      "notes": "Saving for later; interesting stack.",
-      "appliedAt": "2026-09-05",
-      "createdAt": "2026-09-05T10:00:00Z"
+      "salary": 30,
+      "location": "asdasd",
+      "workMode": "hybrid",
+      "createdAt": "2026-09-06T13:37:03.365Z"
     }
   ],
   "companies": [

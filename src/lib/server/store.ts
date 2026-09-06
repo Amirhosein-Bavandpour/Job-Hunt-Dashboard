@@ -29,6 +29,7 @@ interface App {
   notes?: string;
   interviewNotes?: string;
   appliedAt?: string;
+  interviewDate?: string;
   createdAt: string;
 }
 
@@ -50,7 +51,7 @@ function ensureFile() {
           status: 'interview', salary: 45000, location: 'Tehran', workMode: 'hybrid',
           jobUrl: 'https://acme.example.com/job', notes: 'Well-known product; strong design team.',
           interviewNotes: 'Q: How do you scale a component library? A: Design tokens + Storybook + versioning. Q: React perf — know useMemo/useCallback, code splitting, virtualize long lists.',
-          appliedAt: '2026-09-01', createdAt: '2026-09-01T10:00:00Z',
+          appliedAt: '2026-09-01', interviewDate: '2026-09-18', createdAt: '2026-09-01T10:00:00Z',
         },
         {
           id: '2', company: 'Beta Inc', position: 'React Developer',
