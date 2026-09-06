@@ -1,4 +1,5 @@
 import type { ApplicationStatus } from '@/types';
+import type { SxProps, Theme } from '@mui/material';
 
 // Single source of truth for status colours + labels, shared across
 // Dashboard, Applications, Analytics, Calendar, Companies.
@@ -19,3 +20,16 @@ export const STATUS_LABEL: Record<ApplicationStatus, string> = {
   offer: 'Offer',
   rejected: 'Rejected',
 };
+
+// Semantic status chip: outlined in the status colour, transparent fill.
+// NOTE: deliberately NOT the theme's glowing cyan Chip — that override suits
+// counts/actions, while statuses read better in their own colour.
+export function statusChipSx(status: ApplicationStatus): SxProps<Theme> {
+  const c = STATUS_COLORS[status];
+  return {
+    borderColor: c,
+    color: c,
+    background: 'transparent',
+    fontWeight: 600,
+  };
+}

@@ -17,8 +17,11 @@ export default function KanbanColumn({ status, label, apps, onEdit, onDelete }: 
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
   return (
-    <Box sx={{ minWidth: 250, flex: 1 }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5, px: 0.5 }}>
+    // Fixed width + no shrink: 6 columns scroll horizontally instead of
+    // squeezing (squeezed columns clip content and break card layout).
+    // 264px fits 4 columns at 1440px content width; the rest scroll.
+    <Box sx={{ width: 264, flexShrink: 0 }}>
+      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5, px: 0.5 }}>
         <Typography variant="subtitle1" sx={{ textTransform: 'capitalize', fontWeight: 600 }}>
           {label}
         </Typography>
@@ -27,22 +30,39 @@ export default function KanbanColumn({ status, label, apps, onEdit, onDelete }: 
       <Paper
         ref={setNodeRef}
         sx={{
-          minHeight: 200,
+          minHeight: 220,
           p: 1.5,
-          background: isOver ? 'rgba(34,211,238,0.08)' : 'rgba(255,255,255,0.03)',
+          // Same glass family as the cards inside it (theme MuiCard):
+          // identical radius + material so holder and card read as one unit.
+          background: isOver ? 'rgba(34,211,238,0.08)' : 'rgba(255,255,255,0.05)',
+          backdropFilter: 'blur(8px)',
           border: '1px solid',
-          borderColor: isOver ? 'rgba(34,211,238,0.40)' : 'rgba(255,255,255,0.08)',
-          borderRadius: 3,
+          borderColor: isOver ? 'rgba(34,211,238,0.40)' : 'rgba(255,255,255,0.10)',
+          // NOTE: literal px, not a number — sx numbers multiply
+          // shape.borderRadius (16), so 3 would render as 48px.
+          borderRadius: '16px',
           transition: 'background .2s, border-color .2s',
         }}
       >
-        {apps.map((app) => (
-          <ApplicationCard key={app.id} app={app} onEdit={onEdit} onDelete={onDelete} />
-        ))}
+        <Stack spacing={1.5}>
+          {apps.map((app) => (
+            <ApplicationCard key={app.id} app={app} onEdit={onEdit} onDelete={onDelete} />
+          ))}
+        </Stack>
         {apps.length === 0 && (
-          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4, opacity: 0.6 }}>
-            Drop here
-          </Typography>
+          <Box
+            sx={{
+              mt: apps.length ? 1.5 : 0,
+              border: '1px dashed rgba(255,255,255,0.15)',
+              // Inner element: smaller radius than the 16px holder.
+              borderRadius: '10px',
+              py: 4,
+            }}
+          >
+            <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', opacity: 0.6 }}>
+              Drop here
+            </Typography>
+          </Box>
         )}
       </Paper>
     </Box>

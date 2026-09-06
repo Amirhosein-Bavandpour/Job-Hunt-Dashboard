@@ -6,6 +6,20 @@
       "email": "asd@gmail.com",
       "password": "$2b$10$60kdGBZCLpRJIiJOQNYMceE1T8l7.Ph8Uzo3W0H.7uKnc1UI4Wrnq",
       "createdAt": "2026-09-06T12:47:58.374Z"
+    },
+    {
+      "id": "u_1788702739373",
+      "name": "Polish",
+      "email": "polish@test.dev",
+      "password": "$2b$10$1v6nisJGpDuHgVUAlMwLm.kcabIeBtCKBQX7PPXthibv0peeq6F1C",
+      "createdAt": "2026-09-06T13:52:19.373Z"
+    },
+    {
+      "id": "u_1788703995508",
+      "name": "Polish",
+      "email": "polish1788703995165@test.dev",
+      "password": "$2b$10$97gwBpVBHz7.aV2yaRT5du4B5/wSZmBWtJdPLfr4tMAfMoA3TomcG",
+      "createdAt": "2026-09-06T14:13:15.508Z"
     }
   ],
   "apps": [
@@ -13,7 +27,7 @@
       "id": "1",
       "company": "Acme Corp",
       "position": "Frontend Developer",
-      "status": "interview",
+      "status": "offer",
       "salary": 45000,
       "location": "Tehran",
       "workMode": "hybrid",
@@ -27,7 +41,7 @@
       "id": "a_1788701823365",
       "company": "asd",
       "position": "asdasd",
-      "status": "saved",
+      "status": "applied",
       "salary": 30,
       "location": "asdasd",
       "workMode": "hybrid",

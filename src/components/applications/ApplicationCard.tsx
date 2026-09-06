@@ -31,7 +31,17 @@ export default function ApplicationCard({ app, onEdit, onDelete }: Props) {
       {...listeners}
       {...attributes}
       style={style}
-      sx={{ cursor: 'grab', mb: 1.5, '&:active': { cursor: 'grabbing' } }}
+      // No translateY hover here: dnd drives `transform` via the style prop
+      // and the theme already gives cards a hover border/glow — a second
+      // transform would fight the drag transform and cause a visual jump.
+      sx={{
+        cursor: 'grab',
+        '&:active': { cursor: 'grabbing' },
+        // Nested inside the 16px column holder with 12px padding: a smaller
+        // radius keeps the corners concentric instead of blobby.
+        // NOTE: literal px — an sx number would multiply shape.borderRadius.
+        borderRadius: '12px',
+      }}
     >
       <CardContent sx={{ '&:last-child': { pb: 2 } }}>
         <Stack direction="row" justifyContent="space-between" alignItems="flex-start">

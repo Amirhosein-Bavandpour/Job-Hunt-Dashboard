@@ -80,11 +80,12 @@ export const apiSlice = createApi({
           count: response.statusCounts[status] ?? 0,
         }));
 
-        // Applications per month from trend dates
+        // Applications per month from trend dates (skip undated records —
+        // an 'unknown' bucket is meaningless on a time axis).
         const monthMap = new Map<string, number>();
         for (const t of response.trend ?? []) {
           const m = t.date.slice(0, 7);
-          if (!m) continue;
+          if (!m || m === 'unknown') continue;
           monthMap.set(m, (monthMap.get(m) ?? 0) + t.count);
         }
         const byMonth = [...monthMap.entries()]

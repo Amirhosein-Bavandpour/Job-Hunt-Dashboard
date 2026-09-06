@@ -26,7 +26,7 @@ function GlassTooltip({ active, payload, label }: any) {
       sx={{
         background: 'rgba(2,6,23,0.92)',
         border: '1px solid rgba(34,211,238,0.40)',
-        borderRadius: 2,
+        borderRadius: '12px',
         px: 1.5,
         py: 1,
         color: '#f1f5f9',

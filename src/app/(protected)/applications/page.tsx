@@ -17,6 +17,7 @@ import {
   useDeleteApplicationMutation,
 } from '@/features/api/apiSlice';
 import type { JobApplication, ApplicationStatus } from '@/types';
+import { STATUS_LABEL, statusChipSx } from '@/lib/status';
 import ApplicationForm from '@/components/applications/ApplicationForm';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import KanbanBoard from '@/components/applications/KanbanBoard';
@@ -134,10 +135,12 @@ export default function ApplicationsPage() {
         <TextField
           select size="small" label="Status" value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value as 'all' | ApplicationStatus); setPage(1); }}
-          sx={{ minWidth: 160 }}
+          // Match the search field's height: a notched (labelled) small
+          // select renders taller than a labelless small input.
+          sx={{ minWidth: 160, '& .MuiInputBase-root': { height: 40 } }}
         >
-          <MenuItem value="all">All</MenuItem>
-          {STATUSES.map((s) => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+          <MenuItem value="all">All statuses</MenuItem>
+          {STATUSES.map((s) => <MenuItem key={s} value={s}>{STATUS_LABEL[s]}</MenuItem>)}
         </TextField>
       </Stack>
 
@@ -148,7 +151,7 @@ export default function ApplicationsPage() {
           {/* Table */}
           <Table>
             <TableHead>
-              <TableRow>
+              <TableRow sx={{ '& .MuiTableCell-head': { color: 'text.secondary', fontWeight: 600, fontSize: 13, borderBottom: '1px solid rgba(34,211,238,0.25)' } }}>
                 <TableCell>
                   <TableSortLabel active={sortKey === 'company'} direction={sortDir}
                     onClick={() => handleSort('company')}>Company</TableSortLabel>
@@ -175,15 +178,17 @@ export default function ApplicationsPage() {
                   <TableRow hover>
                     <TableCell>{a.company}</TableCell>
                     <TableCell>{a.position}</TableCell>
-                    <TableCell><Chip label={a.status} size="small" /></TableCell>
+                    <TableCell><Chip label={STATUS_LABEL[a.status]} size="small" variant="outlined" sx={statusChipSx(a.status)} /></TableCell>
                     <TableCell>{a.location} · {a.workMode}</TableCell>
                     <TableCell>{a.appliedAt ?? '—'}</TableCell>
                     <TableCell align="right">
-                      <IconButton size="small" onClick={() => setExpandedId(expandedId === a.id ? null : a.id)}>
-                        {expandedId === a.id ? <KeyboardArrowUpIcon fontSize="small" /> : <KeyboardArrowDownIcon fontSize="small" />}
-                      </IconButton>
-                      <IconButton size="small" onClick={() => openEdit(a)}><EditIcon fontSize="small" /></IconButton>
-                      <IconButton size="small" color="error" onClick={() => handleDelete(a)}><DeleteIcon fontSize="small" /></IconButton>
+                      <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                        <IconButton size="small" onClick={() => setExpandedId(expandedId === a.id ? null : a.id)}>
+                          {expandedId === a.id ? <KeyboardArrowUpIcon fontSize="small" /> : <KeyboardArrowDownIcon fontSize="small" />}
+                        </IconButton>
+                        <IconButton size="small" onClick={() => openEdit(a)}><EditIcon fontSize="small" /></IconButton>
+                        <IconButton size="small" color="error" onClick={() => handleDelete(a)}><DeleteIcon fontSize="small" /></IconButton>
+                      </Stack>
                     </TableCell>
                   </TableRow>
                   {expandedId === a.id && (

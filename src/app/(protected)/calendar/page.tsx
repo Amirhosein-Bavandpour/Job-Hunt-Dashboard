@@ -98,12 +98,15 @@ export default function CalendarPage() {
                   <Grid item xs={12 / 7} key={i}>
                     <Box
                       sx={{
-                        minHeight: 92,
+                        minHeight: 80,
                         p: 1,
                         border: '1px solid',
                         borderColor: isToday ? 'primary.main' : 'rgba(255,255,255,0.06)',
-                        borderRadius: 2,
-                        background: inMonth ? 'transparent' : 'rgba(255,255,255,0.02)',
+                        // Literal px: sx numbers multiply shape.borderRadius (16).
+                        borderRadius: '12px',
+                        background: isToday
+                          ? 'rgba(34,211,238,0.08)'
+                          : inMonth ? 'transparent' : 'rgba(255,255,255,0.02)',
                         opacity: inMonth ? 1 : 0.55,
                         transition: 'border-color .2s',
                         '&:hover': { borderColor: 'rgba(34,211,238,0.5)' },

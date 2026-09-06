@@ -4,6 +4,7 @@ import { Box, Grid, Card, CardContent, Typography, Stack, Chip, Divider } from '
 import { motion } from 'framer-motion';
 import { useGetDashboardStatsQuery, useGetApplicationsQuery } from '@/features/api/apiSlice';
 import { useDashboardUIStore } from '@/stores/dashboardUIStore';
+import { STATUS_LABEL, statusChipSx } from '@/lib/status';
 
 const fadeUp = {
   initial: { opacity: 0, y: 40 },
@@ -62,7 +63,9 @@ export default function DashboardPage() {
 
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
         <Typography variant="h6">Recent Applications</Typography>
-        <Chip size="small" label={kanbanMode ? 'kanban' : 'table'} />
+        <Typography variant="caption" color="text.secondary">
+          {kanbanMode ? 'Kanban view' : 'Table view'}
+        </Typography>
       </Stack>
 
       <Stack spacing={1}>
@@ -77,7 +80,7 @@ export default function DashboardPage() {
                       {a.company} · {a.location} · {a.workMode}
                     </Typography>
                   </Box>
-                  <Chip label={a.status} size="small" />
+                  <Chip label={STATUS_LABEL[a.status]} size="small" variant="outlined" sx={statusChipSx(a.status)} />
                 </Stack>
               </CardContent>
             </Card>
