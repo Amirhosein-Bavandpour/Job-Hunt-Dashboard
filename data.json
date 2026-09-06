@@ -1,55 +1,5 @@
 {
-  "users": [
-    {
-      "id": "u_1788695199594",
-      "name": "E2E Tester",
-      "email": "e2e4@test.dev",
-      "password": "$2b$10$vNbChzVcc0uusBsYlssNuu8SqLBJHChCmMVjjaoSXfgeYblJXQNGS",
-      "createdAt": "2026-09-06T11:46:39.594Z"
-    },
-    {
-      "id": "u_1788695248768",
-      "name": "Final Tester",
-      "email": "final@test.dev",
-      "password": "$2b$10$WYyrqfVn4cS8KJCOWscUhucNTrQ0QT.ltUfIBOHxzCQdsk93OJFrS",
-      "createdAt": "2026-09-06T11:47:28.768Z"
-    },
-    {
-      "id": "u_1788695452979",
-      "name": "APITest User",
-      "email": "api@test.dev",
-      "password": "$2b$10$AGD7MisjuamZiLn8MAZUX.uTiNpsYsdDpAXZlXjlOWoQyGpDy4MoS",
-      "createdAt": "2026-09-06T11:50:52.979Z"
-    },
-    {
-      "id": "u_1788695481433",
-      "name": "DelTest",
-      "email": "del@test.dev",
-      "password": "$2b$10$KgovV4xHRcyHhL8lLydhWur3qVZ1QFfqO2KLrJAG02djUrwtSqFpS",
-      "createdAt": "2026-09-06T11:51:21.433Z"
-    },
-    {
-      "id": "u_1788695925306",
-      "name": "DelFix",
-      "email": "del2@test.dev",
-      "password": "$2b$10$3M89jqwsQ2dfTEXxI4EBYe5z62xHxbdmfPRb0Yy42uA/WyM3J30mq",
-      "createdAt": "2026-09-06T11:58:45.306Z"
-    },
-    {
-      "id": "u_1788695956804",
-      "name": "DelFix2",
-      "email": "del3@test.dev",
-      "password": "$2b$10$UAKaFNyWWOs6.2k8V8wuZ.k2k.4IkjQxIHEacLlavYOUfkqY1nAIy",
-      "createdAt": "2026-09-06T11:59:16.804Z"
-    },
-    {
-      "id": "u_1788695973546",
-      "name": "DelFix3",
-      "email": "del4@test.dev",
-      "password": "$2b$10$Gsc8tRQJEjhqVscMNFLaeuNvi3x4DuzcN/g3zMsew5Tjc.pcIZ.qe",
-      "createdAt": "2026-09-06T11:59:33.546Z"
-    }
-  ],
+  "users": [],
   "apps": [
     {
       "id": "1",
@@ -91,42 +41,6 @@
       "notes": "Saving for later; interesting stack.",
       "appliedAt": "2026-09-05",
       "createdAt": "2026-09-05T10:00:00Z"
-    },
-    {
-      "id": "a_1788695481461",
-      "company": "DeleteMe Inc",
-      "position": "Temp",
-      "status": "saved",
-      "salary": 10000,
-      "location": "Tehran",
-      "workMode": "remote",
-      "notes": "delete me",
-      "appliedAt": "2026-10-25",
-      "createdAt": "2026-09-06T11:51:21.461Z"
-    },
-    {
-      "id": "a_1788695926266",
-      "company": "DeleteMe Inc",
-      "position": "Temp",
-      "status": "saved",
-      "salary": 10000,
-      "location": "Tehran",
-      "workMode": "remote",
-      "notes": "delete me",
-      "appliedAt": "2026-10-25",
-      "createdAt": "2026-09-06T11:58:46.266Z"
-    },
-    {
-      "id": "a_1788695957326",
-      "company": "DeleteMe Inc",
-      "position": "Temp",
-      "status": "saved",
-      "salary": 10000,
-      "location": "Tehran",
-      "workMode": "remote",
-      "notes": "delete me",
-      "appliedAt": "2026-10-25",
-      "createdAt": "2026-09-06T11:59:17.326Z"
     }
   ],
   "companies": [
