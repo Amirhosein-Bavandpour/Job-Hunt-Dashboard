@@ -31,6 +31,9 @@ export const apiSlice = createApi({
     getApplications: builder.query<JobApplication[], void>({
       query: () => ({ url: '/apps', method: 'GET' }),
       providesTags: ['Application'],
+      // /api/apps returns { applications, companies } — unwrap the array.
+      transformResponse: (res: { applications: JobApplication[] } | JobApplication[]) =>
+        Array.isArray(res) ? res : res.applications ?? [],
     }),
 
     getApplication: builder.query<JobApplication, string>({
@@ -101,8 +104,11 @@ export const apiSlice = createApi({
     getCalendarEvents: builder.query<CalendarEvent[], void>({
       query: () => ({ url: '/apps', method: 'GET' }),
       providesTags: ['Application'],
-      transformResponse: (apps: JobApplication[]): CalendarEvent[] =>
-        apps
+      transformResponse: (
+        res: { applications: JobApplication[] } | JobApplication[]
+      ): CalendarEvent[] => {
+        const apps = Array.isArray(res) ? res : res.applications ?? [];
+        return apps
           .filter((a) => a.interviewDate)
           .map((a) => ({
             id: `evt-${a.id}`,
@@ -111,12 +117,16 @@ export const apiSlice = createApi({
             position: a.position,
             status: a.status,
             date: a.interviewDate as string,
-          })),
+          }));
+      },
     }),
 
     getCompanies: builder.query<CompanySummary[], void>({
       query: () => ({ url: '/companies', method: 'GET' }),
       providesTags: ['Application'],
+      // /api/companies returns { companies } — unwrap the array.
+      transformResponse: (res: { companies: CompanySummary[] } | CompanySummary[]) =>
+        Array.isArray(res) ? res : res.companies ?? [],
     }),
 
     addApplication: builder.mutation<JobApplication, Partial<JobApplication>>({

@@ -1,5 +1,13 @@
 {
-  "users": [],
+  "users": [
+    {
+      "id": "u_1788698878374",
+      "name": "asd",
+      "email": "asd@gmail.com",
+      "password": "$2b$10$60kdGBZCLpRJIiJOQNYMceE1T8l7.Ph8Uzo3W0H.7uKnc1UI4Wrnq",
+      "createdAt": "2026-09-06T12:47:58.374Z"
+    }
+  ],
   "apps": [
     {
       "id": "1",
