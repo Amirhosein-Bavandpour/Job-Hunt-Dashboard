@@ -1,33 +1,11 @@
 {
-  "users": [
-    {
-      "id": "u_1788698878374",
-      "name": "asd",
-      "email": "asd@gmail.com",
-      "password": "$2b$10$60kdGBZCLpRJIiJOQNYMceE1T8l7.Ph8Uzo3W0H.7uKnc1UI4Wrnq",
-      "createdAt": "2026-09-06T12:47:58.374Z"
-    },
-    {
-      "id": "u_1788702739373",
-      "name": "Polish",
-      "email": "polish@test.dev",
-      "password": "$2b$10$1v6nisJGpDuHgVUAlMwLm.kcabIeBtCKBQX7PPXthibv0peeq6F1C",
-      "createdAt": "2026-09-06T13:52:19.373Z"
-    },
-    {
-      "id": "u_1788703995508",
-      "name": "Polish",
-      "email": "polish1788703995165@test.dev",
-      "password": "$2b$10$97gwBpVBHz7.aV2yaRT5du4B5/wSZmBWtJdPLfr4tMAfMoA3TomcG",
-      "createdAt": "2026-09-06T14:13:15.508Z"
-    }
-  ],
+  "users": [],
   "apps": [
     {
       "id": "1",
       "company": "Acme Corp",
       "position": "Frontend Developer",
-      "status": "offer",
+      "status": "interview",
       "salary": 45000,
       "location": "Tehran",
       "workMode": "hybrid",
@@ -35,17 +13,35 @@
       "notes": "Well-known product; strong design team.",
       "interviewNotes": "Q: How do you scale a component library? A: Design tokens + Storybook + versioning. Q: React perf — know useMemo/useCallback, code splitting, virtualize long lists.",
       "appliedAt": "2026-09-01",
+      "interviewDate": "2026-09-18",
       "createdAt": "2026-09-01T10:00:00Z"
     },
     {
-      "id": "a_1788701823365",
-      "company": "asd",
-      "position": "asdasd",
+      "id": "2",
+      "company": "Beta Inc",
+      "position": "React Developer",
       "status": "applied",
-      "salary": 30,
-      "location": "asdasd",
-      "workMode": "hybrid",
-      "createdAt": "2026-09-06T13:37:03.365Z"
+      "salary": 42000,
+      "location": "Tehran",
+      "workMode": "remote",
+      "jobUrl": "https://beta.example.com/job",
+      "notes": "Remote-friendly; good benefits.",
+      "interviewNotes": "Research: they use Next.js 14 + Tailwind. Question to ask: how do you handle SSR vs CSR split?",
+      "appliedAt": "2026-09-03",
+      "createdAt": "2026-09-03T10:00:00Z"
+    },
+    {
+      "id": "3",
+      "company": "Gamma LLC",
+      "position": "UI Engineer",
+      "status": "saved",
+      "salary": 38000,
+      "location": "Tehran",
+      "workMode": "on-site",
+      "jobUrl": "https://gamma.example.com/job",
+      "notes": "Saving for later; interesting stack.",
+      "appliedAt": "2026-09-05",
+      "createdAt": "2026-09-05T10:00:00Z"
     }
   ],
   "companies": [
