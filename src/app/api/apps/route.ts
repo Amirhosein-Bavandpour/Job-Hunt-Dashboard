@@ -9,15 +9,18 @@ import {
 
 function requireAuth(req: NextRequest): Promise<{ userId: string; email: string } | Response> {
   const token = getCookie(req, 'jhd_auth');
-  if (!token) {
-    return Promise.resolve(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }));
+  if (token) {
+    return verifyToken(token).then((payload) => {
+      if (!payload) {
+        return NextResponse.json({ error: 'Invalid or expired session' }, { status: 401 });
+      }
+      return { userId: payload.sub, email: payload.email };
+    });
   }
-  return verifyToken(token).then((payload) => {
-    if (!payload) {
-      return NextResponse.json({ error: 'Invalid or expired session' }, { status: 401 });
-    }
-    return { userId: payload.sub, email: payload.email };
-  });
+  // Demo-mode fallback: serve the shared data without a JWT cookie.
+  // The file-store version has no per-user isolation, so reads are unguarded
+  // in demo mode on the live deploy.
+  return Promise.resolve({ userId: 'demo', email: 'demo@jobhunt.dev' });
 }
 
 export async function GET(req: NextRequest) {
@@ -65,8 +68,16 @@ export async function POST(req: NextRequest) {
   }
 
   const store = readData();
-  store.apps.push(app);
-  writeData(store);
+  try {
+    store.apps.push(app);
+    writeData(store);
+  } catch {
+    // Read-only filesystem (demo mode on live deploy) — can't persist.
+    return NextResponse.json(
+      { error: 'Demo mode: changes are not persisted on the live deploy.' },
+      { status: 503 }
+    );
+  }
 
   return NextResponse.json({ ok: true, app }, { status: 201 });
 }
@@ -102,8 +113,15 @@ export async function PUT(req: NextRequest) {
     interviewNotes: body.interviewNotes != null ? (body.interviewNotes === '' ? undefined : String(body.interviewNotes)) : existing.interviewNotes,
     appliedAt: body.appliedAt != null ? (body.appliedAt === '' ? undefined : String(body.appliedAt)) : existing.appliedAt,
   };
-  store.apps[idx] = updated;
-  writeData(store);
+  try {
+    store.apps[idx] = updated;
+    writeData(store);
+  } catch {
+    return NextResponse.json(
+      { error: 'Demo mode: changes are not persisted on the live deploy.' },
+      { status: 503 }
+    );
+  }
 
   return NextResponse.json({ ok: true, app: updated });
 }
@@ -126,8 +144,15 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: 'Application not found' }, { status: 404 });
   }
 
-  store.apps.splice(idx, 1);
-  writeData(store);
+  try {
+    store.apps.splice(idx, 1);
+    writeData(store);
+  } catch {
+    return NextResponse.json(
+      { error: 'Demo mode: changes are not persisted on the live deploy.' },
+      { status: 503 }
+    );
+  }
 
   return NextResponse.json({ ok: true });
 }
