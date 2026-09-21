@@ -49,6 +49,16 @@ Optional: set `JWT_SECRET` in `.env.local` (falls back to a dev-only default).
 npm run build   # production build (typecheck-clean, all routes)
 ```
 
+## Deploy note
+
+The live Netlify build runs on a read-only serverless filesystem, so the file
+store (`data.json`) can't persist new users there. The auth routes detect that
+condition and fall back to a **demo user** so the protected UI still renders —
+login/register succeed on the live site, the app opens as "Demo User", and the
+frontend sees the same `{ ok, user }` shapes as in local dev. The file store
+still works fully in local development (where `data.json` is writable). Swapping
+the file store for a real database is a one-layer change (see roadmap).
+
 ## API
 
 | Method | Route | Auth | Notes |
@@ -74,4 +84,5 @@ npm run build   # production build (typecheck-clean, all routes)
 - [x] Phase 5: Calendar, Analytics (Recharts), dark/light mode
 - [x] Phase 6: Companies aggregation, interview-prep notes
 - [x] Phase 7: real backend — Route Handlers + JWT cookies + file store (zero component changes, as designed)
+- [x] Phase 8: live-deploy demo mode — auth routes fall back to a demo user when the serverless filesystem is read-only, so the protected UI renders on Netlify without a database
 - [ ] Future: swap file store for MongoDB/Postgres, per-user data isolation
