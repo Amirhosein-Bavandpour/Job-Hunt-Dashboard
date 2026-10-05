@@ -1,6 +1,7 @@
 import {
   createApi,
   fetchBaseQuery,
+  type BaseQueryFn,
   type FetchArgs,
   type FetchBaseQueryError,
 } from '@reduxjs/toolkit/query/react';
@@ -10,18 +11,106 @@ import type {
   CalendarEvent,
   CompanySummary,
 } from '@/types';
+import { computeStats, summarizeCompanies } from '@/lib/aggregate';
+import {
+  localId,
+  mergeLocalApplications,
+  recordLocalAdd,
+  recordLocalDelete,
+  recordLocalUpdate,
+} from '@/lib/localApps';
 
 // ---- real backend via Next.js Route Handlers (src/app/api/...) ----
 // Base URL is relative so it works in dev (localhost:3000) and production
 // (same origin, no CORS needed). The httpOnly JWT cookie is sent automatically
 // by the browser on every request to the same origin.
-const baseQuery = fetchBaseQuery({
+const rawBaseQuery = fetchBaseQuery({
   baseUrl: '/api',
   prepareHeaders: (headers) => {
     // Any future auth header (e.g. a non-cookie token) goes here.
     return headers;
   },
 });
+
+// /api/apps returns { applications, companies } — unwrap the array.
+const unwrapApps = (
+  res: { applications?: JobApplication[] } | JobApplication[]
+): JobApplication[] => (Array.isArray(res) ? res : res.applications ?? []);
+
+// Shape RTK Query accepts back from the base query: exactly one of data/error.
+type LocalWriteResult =
+  | { data: unknown; error?: undefined }
+  | { data?: undefined; error: FetchBaseQueryError };
+
+/**
+ * Replay a rejected write into this browser's localStorage overlay and answer
+ * success. Only writes to /api/apps are handled; anything else falls through to
+ * the original error.
+ */
+function applyLocalWrite(method: string, request: FetchArgs): LocalWriteResult | null {
+  const body = typeof request.body === 'string'
+    ? (JSON.parse(request.body) as unknown)
+    : request.body;
+
+  if (method === 'POST') {
+    const input = (body ?? {}) as Partial<JobApplication>;
+    if (!input.company || !input.position) {
+      // Same contract the server enforces before it would touch the store.
+      return { error: { status: 400, data: { error: 'company and position are required' } } };
+    }
+    const app: JobApplication = {
+      ...input, // optional extras: salary, notes, appliedAt, interviewDate, ...
+      id: localId(),
+      company: String(input.company),
+      position: String(input.position),
+      status: input.status ?? 'saved',
+      location: input.location ?? '',
+      workMode: input.workMode ?? 'remote',
+      createdAt: new Date().toISOString(),
+    };
+    recordLocalAdd(app);
+    return { data: { ok: true, app } };
+  }
+
+  if (method === 'PUT') {
+    const { id, ...patch } = (body ?? {}) as { id?: string } & Partial<JobApplication>;
+    if (!id) return null;
+    recordLocalUpdate(id, patch);
+    // Nobody reads this record (invalidation refetches the merged list), but
+    // keep the { ok, app } shape the endpoint promises.
+    return { data: { ok: true, app: { ...patch, id } as JobApplication } };
+  }
+
+  if (method === 'DELETE') {
+    const id = (request.params as Record<string, unknown> | undefined)?.id;
+    if (typeof id !== 'string' || !id) return null;
+    recordLocalDelete(id);
+    return { data: { ok: true } };
+  }
+
+  return null;
+}
+
+// The demo deploy has a read-only filesystem, so /api/apps mutations answer 503
+// ("changes are not persisted on the live deploy"). Instead of dropping the
+// edit, hand it to localStorage and let the queries below merge it back into
+// every read — that is what makes adding an application actually work on the
+// live demo. A writable backend never returns 503, so this path stays idle.
+const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
+  args,
+  api,
+  extraOptions
+) => {
+  const result = await rawBaseQuery(args, api, extraOptions);
+  if (result.error?.status !== 503) return result;
+
+  const request: FetchArgs = typeof args === 'string' ? { url: args } : args;
+  const method = (request.method ?? 'GET').toUpperCase();
+  if (!request.url.startsWith('/apps')) return result;
+  if (method !== 'POST' && method !== 'PUT' && method !== 'DELETE') return result;
+
+  return applyLocalWrite(method, request) ?? result;
+};
 
 export const apiSlice = createApi({
   reducerPath: 'api',
@@ -31,9 +120,8 @@ export const apiSlice = createApi({
     getApplications: builder.query<JobApplication[], void>({
       query: () => ({ url: '/apps', method: 'GET' }),
       providesTags: ['Application'],
-      // /api/apps returns { applications, companies } — unwrap the array.
-      transformResponse: (res: { applications: JobApplication[] } | JobApplication[]) =>
-        Array.isArray(res) ? res : res.applications ?? [],
+      transformResponse: (res: { applications?: JobApplication[] } | JobApplication[]) =>
+        mergeLocalApplications(unwrapApps(res)),
     }),
 
     getApplication: builder.query<JobApplication, string>({
@@ -42,36 +130,33 @@ export const apiSlice = createApi({
     }),
 
     getDashboardStats: builder.query<{ total: number; interviews: number; offers: number; rejected: number; thisMonth: number; upcoming: number }, void>({
-      query: () => ({ url: '/stats', method: 'GET' }),
+      // Aggregates are derived from /api/apps + the local overlay rather than
+      // read from /api/stats: the demo store can't count edits it never stored.
+      query: () => ({ url: '/apps', method: 'GET' }),
       providesTags: ['Stats'],
-      transformResponse: (response: {
-        total: number;
-        statusCounts: Record<string, number>;
-        trend: { date: string; count: number }[];
-        statusTrend: { month: string; applied: number; interview: number; offer: number; rejected: number }[];
-        thisMonth: number;
-        avgSalary: number;
-      }): { total: number; interviews: number; offers: number; rejected: number; thisMonth: number; upcoming: number } => ({
-        total: response.total,
-        interviews: response.statusCounts['interview'] ?? 0,
-        offers: response.statusCounts['offer'] ?? 0,
-        rejected: response.statusCounts['rejected'] ?? 0,
-        thisMonth: response.thisMonth ?? 0,
-        upcoming: response.statusCounts['interview'] ?? 0,
-      }),
+      transformResponse: (
+        res: { applications?: JobApplication[] } | JobApplication[]
+      ): { total: number; interviews: number; offers: number; rejected: number; thisMonth: number; upcoming: number } => {
+        const response = computeStats(mergeLocalApplications(unwrapApps(res)));
+        return {
+          total: response.total,
+          interviews: response.statusCounts['interview'] ?? 0,
+          offers: response.statusCounts['offer'] ?? 0,
+          rejected: response.statusCounts['rejected'] ?? 0,
+          thisMonth: response.thisMonth ?? 0,
+          upcoming: response.statusCounts['interview'] ?? 0,
+        };
+      },
     }),
 
     getAnalytics: builder.query<AnalyticsData, void>({
-      query: () => ({ url: '/stats', method: 'GET' }),
+      // Same source as getDashboardStats — see the note there.
+      query: () => ({ url: '/apps', method: 'GET' }),
       providesTags: ['Stats'],
-      transformResponse: (response: {
-        total: number;
-        statusCounts: Record<string, number>;
-        trend: { date: string; count: number }[];
-        statusTrend: { month: string; applied: number; interview: number; offer: number; rejected: number }[];
-        thisMonth: number;
-        avgSalary: number;
-      }): AnalyticsData => {
+      transformResponse: (
+        res: { applications?: JobApplication[] } | JobApplication[]
+      ): AnalyticsData => {
+        const response = computeStats(mergeLocalApplications(unwrapApps(res)));
         const statuses: JobApplication['status'][] = [
           'saved', 'applied', 'screening', 'interview', 'offer', 'rejected',
         ];
@@ -109,9 +194,9 @@ export const apiSlice = createApi({
       query: () => ({ url: '/apps', method: 'GET' }),
       providesTags: ['Application'],
       transformResponse: (
-        res: { applications: JobApplication[] } | JobApplication[]
+        res: { applications?: JobApplication[] } | JobApplication[]
       ): CalendarEvent[] => {
-        const apps = Array.isArray(res) ? res : res.applications ?? [];
+        const apps = mergeLocalApplications(unwrapApps(res));
         return apps
           .filter((a) => a.interviewDate)
           .map((a) => ({
@@ -126,11 +211,12 @@ export const apiSlice = createApi({
     }),
 
     getCompanies: builder.query<CompanySummary[], void>({
-      query: () => ({ url: '/companies', method: 'GET' }),
+      // Aggregated client-side from /api/apps + the local overlay — a company
+      // the visitor just added exists nowhere else on a read-only demo deploy.
+      query: () => ({ url: '/apps', method: 'GET' }),
       providesTags: ['Application'],
-      // /api/companies returns { companies } — unwrap the array.
-      transformResponse: (res: { companies: CompanySummary[] } | CompanySummary[]) =>
-        Array.isArray(res) ? res : res.companies ?? [],
+      transformResponse: (res: { applications?: JobApplication[] } | JobApplication[]) =>
+        summarizeCompanies(mergeLocalApplications(unwrapApps(res))),
     }),
 
     addApplication: builder.mutation<JobApplication, Partial<JobApplication>>({

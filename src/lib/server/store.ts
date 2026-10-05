@@ -86,6 +86,11 @@ function readData() {
 }
 
 function writeData(store: Store) {
+  // DEMO_MODE=1 makes every write fail exactly the way the read-only live
+  // deploy does, so the localStorage fallback can be exercised locally.
+  if (process.env.DEMO_MODE === '1') {
+    throw new Error('Demo mode: data store is read-only.');
+  }
   writeFileSync(DATA_PATH, JSON.stringify(store, null, 2));
 }
 

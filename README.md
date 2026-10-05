@@ -55,9 +55,16 @@ The live Netlify build runs on a read-only serverless filesystem, so the file
 store (`data.json`) can't persist new users there. The auth routes detect that
 condition and fall back to a **demo user** so the protected UI still renders —
 login/register succeed on the live site, the app opens as "Demo User", and the
-frontend sees the same `{ ok, user }` shapes as in local dev. The file store
-still works fully in local development (where `data.json` is writable). Swapping
-the file store for a real database is a one-layer change (see roadmap).
+frontend sees the same `{ ok, user }` shapes as in local dev.
+
+Application writes work there too: when `POST/PUT/DELETE /api/apps` answer 503,
+the client replays the write into `localStorage` (`src/lib/localApps.ts`) and
+merges it back into every read, so adding, editing and deleting applications on
+the live demo behaves normally and survives reloads — per browser, nothing ever
+leaves the visitor's machine. A banner on the Applications page says so and
+offers **Reset**. When the backend is writable (local development, `data.json`)
+that overlay stays empty, so nothing changes in the normal flow. Swapping the
+file store for a real database is a one-layer change (see roadmap).
 
 ## API
 
@@ -75,6 +82,11 @@ the file store for a real database is a one-layer change (see roadmap).
 | GET | `/api/companies` | cookie | `{ companies }` aggregated summaries, ranked |
 | GET | `/api/stats` | cookie | totals, status counts, trends, avg salary |
 
+The UI derives stats, companies and calendar events client-side from
+`GET /api/apps` (plus the demo `localStorage` overlay) using the same
+`src/lib/aggregate.ts` functions these two routes use, so the numbers on screen
+include browser-local demo edits.
+
 ## Roadmap
 
 - [x] Phase 1: scaffold, theme, sidebar shell, dashboard
@@ -85,4 +97,5 @@ the file store for a real database is a one-layer change (see roadmap).
 - [x] Phase 6: Companies aggregation, interview-prep notes
 - [x] Phase 7: real backend — Route Handlers + JWT cookies + file store (zero component changes, as designed)
 - [x] Phase 8: live-deploy demo mode — auth routes fall back to a demo user when the serverless filesystem is read-only, so the protected UI renders on Netlify without a database
+- [x] Phase 9: demo-mode CRUD — rejected writes fall back to a `localStorage` overlay merged into every read (list, stats, companies, calendar), so the Netlify demo accepts applications with no database behind it
 - [ ] Future: swap file store for MongoDB/Postgres, per-user data isolation

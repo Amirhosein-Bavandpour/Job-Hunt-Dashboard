@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useState, Fragment } from 'react';
+import { useEffect, useMemo, useState, Fragment } from 'react';
+import { useDispatch } from 'react-redux';
 import {
   Box, Typography, TextField, MenuItem, Button, Stack,
   Table, TableHead, TableRow, TableCell, TableBody, TableSortLabel,
@@ -13,11 +14,13 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import {
+  apiSlice,
   useGetApplicationsQuery,
   useDeleteApplicationMutation,
 } from '@/features/api/apiSlice';
 import type { JobApplication, ApplicationStatus } from '@/types';
 import { STATUS_LABEL, statusChipSx } from '@/lib/status';
+import { clearLocalApps, hasLocalApps } from '@/lib/localApps';
 import ApplicationForm from '@/components/applications/ApplicationForm';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import KanbanBoard from '@/components/applications/KanbanBoard';
@@ -48,6 +51,19 @@ export default function ApplicationsPage() {
   const kanbanMode = useDashboardUIStore((s) => s.kanbanMode);
   const setKanbanMode = useDashboardUIStore((s) => s.setKanbanMode);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // The read-only demo deploy keeps edits in this browser instead of a server —
+  // say so, and give the visitor a way to throw those edits away. Re-checked
+  // whenever the (merged) application list changes.
+  const dispatch = useDispatch();
+  const [localEdits, setLocalEdits] = useState(false);
+  useEffect(() => { setLocalEdits(hasLocalApps()); }, [apps]);
+
+  const resetLocalEdits = () => {
+    clearLocalApps();
+    setLocalEdits(false);
+    dispatch(apiSlice.util.invalidateTags(['Application', 'Stats']));
+  };
 
   const filtered = useMemo(() => {
     let list = [...apps];
@@ -123,6 +139,21 @@ export default function ApplicationsPage() {
           </Button>
         </Stack>
       </Stack>
+
+      {localEdits && (
+        <Alert
+          severity="info"
+          sx={{ mb: 2 }}
+          action={
+            <Button color="inherit" size="small" onClick={resetLocalEdits}>
+              Reset
+            </Button>
+          }
+        >
+          Demo deploy: your changes are saved in this browser only (no server
+          behind this view).
+        </Alert>
+      )}
 
       {/* Controls */}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
