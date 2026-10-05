@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode, useEffect, useState } from 'react';
+import { useMediaQuery, useTheme } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
@@ -31,6 +32,10 @@ import { useDashboardUIStore } from '@/stores/dashboardUIStore';
 import { useThemeMode } from '@/store/ThemeModeProvider';
 
 const DRAWER_WIDTH = 240;
+// Below this width a persistent sidebar would leave no room for content, so the drawer
+// switches to MUI's `temporary` variant: an overlay with a backdrop that never pushes
+// <main>. 768 = the usual tablet/phone boundary (MUI's own `md` of 900 is too eager).
+const DRAWER_BREAKPOINT = 768;
 
 // Logout: clear the httpOnly JWT cookie on the server, then clear client state.
 async function handleLogout(dispatch: ReturnType<typeof useDispatch>) {
@@ -54,12 +59,37 @@ const navItems = [
 export default function AppShell({ children }: { children: ReactNode }) {
   const sidebarOpen = useDashboardUIStore((s) => s.sidebarOpen);
   const toggleSidebar = useDashboardUIStore((s) => s.toggleSidebar);
+  const setSidebarOpen = useDashboardUIStore((s) => s.setSidebarOpen);
   const { mode, toggleMode } = useThemeMode();
+  const theme = useTheme();
+  // defaultMatches: true -> SSR and the hydration render paint the desktop layout
+  // (the common case for a dashboard), then matchMedia corrects it immediately after.
+  const isDesktop = useMediaQuery(theme.breakpoints.up(DRAWER_BREAKPOINT), {
+    defaultMatches: true,
+  });
   const pathname = usePathname();
   const user = useSelector((s: RootState) => s.auth.user);
   const dispatch = useDispatch();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  // The overlay (mobile) drawer keeps its own open state, starting closed. Sharing the
+  // store's `sidebarOpen` — which defaults to open for the desktop layout — would mount
+  // the Modal open and close it again before it ever painted, which strands MUI's Modal
+  // mid-transition: an invisible full-screen layer that swallows every click on the page.
+  const [overlayOpen, setOverlayOpen] = useState(false);
+
+  // Drop the overlay whenever the route or the breakpoint changes, so it can neither
+  // survive a navigation nor arrive stale (open) when re-entering mobile widths.
+  useEffect(() => {
+    setOverlayOpen(false);
+  }, [isDesktop, pathname]);
+
+  const drawerOpen = isDesktop ? sidebarOpen : overlayOpen;
+  const openDrawer = () => (isDesktop ? toggleSidebar() : setOverlayOpen((v) => !v));
+  const closeDrawer = () => (isDesktop ? setSidebarOpen(false) : setOverlayOpen(false));
+  // Dismissing the overlay only: safe to call unconditionally (already false on desktop).
+  const closeOverlay = () => setOverlayOpen(false);
 
   const drawer = (
     <Box>
@@ -75,6 +105,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
             component={Link}
             href={item.href}
             selected={pathname === item.href}
+            // Overlay mode: dismiss the drawer as soon as a choice is made, without
+            // waiting for the route to change (no-op on desktop, where the persistent
+            // sidebar is meant to stay put).
+            onClick={closeOverlay}
             sx={{
               mx: 1.5,
               my: 1,
@@ -123,7 +157,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           <IconButton
             color="inherit"
             edge="start"
-            onClick={toggleSidebar}
+            onClick={openDrawer}
             sx={{ mr: 2 }}
             aria-label="toggle sidebar"
           >
@@ -140,11 +174,37 @@ export default function AppShell({ children }: { children: ReactNode }) {
       </AppBar>
 
       <Drawer
-        variant="persistent"
-        open={sidebarOpen}
+        variant={isDesktop ? 'persistent' : 'temporary'}
+        open={drawerOpen}
+        // Backdrop click / Escape (temporary variant only) close the overlay.
+        onClose={closeDrawer}
         sx={{
-          width: DRAWER_WIDTH,
-          flexShrink: 0,
+          // Only the docked (persistent) variant may size the root: for `temporary` the
+          // root is the fixed-position Modal wrapper, so a width here would shrink the
+          // backdrop. This root is the flex item that reserves the row's space, so
+          // collapsing it is what makes <main> reflow instead of leaving a dead gap.
+          ...(isDesktop
+            ? {
+                width: drawerOpen ? DRAWER_WIDTH : 0,
+                flexShrink: 0,
+                transition: (t) =>
+                  t.transitions.create('width', {
+                    easing: drawerOpen
+                      ? t.transitions.easing.easeOut
+                      : t.transitions.easing.sharp,
+                    duration: drawerOpen
+                      ? t.transitions.duration.enteringScreen
+                      : t.transitions.duration.leavingScreen,
+                  }),
+              }
+            : {}),
+          // SSR can't know the viewport, so the first paint on a phone still carries the
+          // desktop variant. Hide the docked slot below the breakpoint (0.02 = MUI's
+          // `down()` convention, so this never disagrees with `up(DRAWER_BREAKPOINT)`)
+          // and that frame gets full-width <main> instead of a 240px dead sidebar.
+          '&.MuiDrawer-docked': {
+            [`@media (max-width: ${DRAWER_BREAKPOINT - 0.02}px)`]: { display: 'none' },
+          },
           '& .MuiDrawer-paper': { width: DRAWER_WIDTH, boxSizing: 'border-box' },
         }}
       >
